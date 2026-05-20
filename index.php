@@ -38,6 +38,10 @@ try {
 
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM attivita_eventi WHERE Stato = 'pubblicata'");
     $total_attivita = $stmt->fetch()['total'] ?? 0;
+
+    // Conta utenti finali
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM utenti WHERE tipo_utente IN ('studente', 'genitore')");
+    $total_users = (int)($stmt->fetch()['total'] ?? 0);
 } catch(PDOException $e) {
     // Se il database non è ancora configurato, mostra valori di default
     // L'utente vedrà la pagina ma senza dati
@@ -86,7 +90,9 @@ $translations = [
         'corsi_certificazioni' => 'Corsi e Certificazioni',
         'storico_fsl' => 'Storico personale e materiali FSL',
         'cta_join' => 'Unisciti alla piattaforma',
-        'footer' => '© 2025 Open House. Tutti i diritti riservati.'
+        'footer' => '© 2025 Open House. Tutti i diritti riservati.',
+        'utenti_finali' => 'Utenti Finali',
+        'partner' => 'Partner'
     ],
     'en' => [
         'title' => 'VR Open House - Immersive Orientation',
@@ -127,7 +133,9 @@ $translations = [
         'corsi_certificazioni' => 'Courses and Certifications',
         'storico_fsl' => 'Personal history and FSL materials',
         'cta_join' => 'Join the platform',
-        'footer' => '© 2025 Open House. All rights reserved.'
+        'footer' => '© 2025 Open House. All rights reserved.',
+        'utenti_finali' => 'End Users',
+        'partner' => 'Partners'
     ]
 ];
 
@@ -189,7 +197,7 @@ $t = $translations[$lang];
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4"><?= $t['hero_title'] ?></h1>
+                    <h1 class="display-4 fw-bold mb-4" style="color: #1a3d5c;"><?= $t['hero_title'] ?></h1>
                     <p class="lead mb-4"><?= $t['hero_subtitle'] ?></p>
                     <div class="d-flex gap-3">
                         <a href="register.php?lang=<?= $lang ?>" class="btn btn-light btn-lg"><?= $t['registrati'] ?></a>
@@ -208,23 +216,20 @@ $t = $translations[$lang];
         <div class="container">
             <div class="row text-center">
                 <div class="col-md-3">
-                    <h2 class="display-4 text-primary"><?= $total_enti ?></h2>
-                    <p class="lead"><?= $t['istituti'] ?> e partner</p>
-                    <small class="text-muted d-block">
-                        <?= $t['istituti'] ?>: <?= $total_istituti ?> • Partner: <?= $total_partner ?>
-                    </small>
+                    <h2 class="display-4 text-primary"><?= $total_istituti ?></h2>
+                    <p class="lead"><?= $t['istituti'] ?></p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-4 text-warning"><?= $total_partner ?></h2>
+                    <p class="lead"><?= $t['partner'] ?></p>
                 </div>
                 <div class="col-md-3">
                     <h2 class="display-4 text-success"><?= $total_attivita ?></h2>
                     <p class="lead"><?= $t['attivita'] ?></p>
                 </div>
                 <div class="col-md-3">
-                    <h2 class="display-4 text-info"><i class="bi bi-vr"></i></h2>
-                    <p class="lead"><?= $t['vr'] ?></p>
-                </div>
-                <div class="col-md-3">
-                    <h2 class="display-4 text-warning"><i class="bi bi-clock-history"></i></h2>
-                    <p class="lead"><?= $t['always_on'] ?></p>
+                    <h2 class="display-4 text-info"><?= $total_users ?></h2>
+                    <p class="lead"><?= $t['utenti_finali'] ?></p>
                 </div>
             </div>
         </div>
