@@ -6,6 +6,8 @@ $lang = $_GET['lang'] ?? 'it';
 // Gestione errori database
 $attivita_featured = [];
 $total_istituti = 0;
+$total_partner = 0;
+$total_enti = 0;
 $total_attivita = 0;
 
 try {
@@ -25,9 +27,14 @@ try {
     $stmt->execute();
     $attivita_featured = $stmt->fetchAll();
 
-    // Conta statistiche
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM istituti_e_partner");
-    $total_istituti = $stmt->fetch()['total'] ?? 0;
+    // Conta statistiche separando istituti e partner in base ai codici dedicati
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM istituti_e_partner WHERE Cod_Mecc IS NOT NULL AND Cod_Mecc != ''");
+    $total_istituti = (int)($stmt->fetch()['total'] ?? 0);
+
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM istituti_e_partner WHERE Cod_REA IS NOT NULL AND Cod_REA != ''");
+    $total_partner = (int)($stmt->fetch()['total'] ?? 0);
+
+    $total_enti = $total_istituti + $total_partner;
 
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM attivita_eventi WHERE Stato = 'pubblicata'");
     $total_attivita = $stmt->fetch()['total'] ?? 0;
@@ -201,8 +208,11 @@ $t = $translations[$lang];
         <div class="container">
             <div class="row text-center">
                 <div class="col-md-3">
-                    <h2 class="display-4 text-primary"><?= $total_istituti ?></h2>
-                    <p class="lead"><?= $t['istituti'] ?></p>
+                    <h2 class="display-4 text-primary"><?= $total_enti ?></h2>
+                    <p class="lead"><?= $t['istituti'] ?> e partner</p>
+                    <small class="text-muted d-block">
+                        <?= $t['istituti'] ?>: <?= $total_istituti ?> • Partner: <?= $total_partner ?>
+                    </small>
                 </div>
                 <div class="col-md-3">
                     <h2 class="display-4 text-success"><?= $total_attivita ?></h2>
