@@ -14,8 +14,7 @@ $stmt = $pdo->prepare("SELECT
                         Comune as comune,
                         Provincia as provincia,
                         Regione as regione,
-                        Email as email,
-                        Telefono as telefono
+                        Email as email
                        FROM istituti_e_partner
                        WHERE ID_Ente = ?");
 $stmt->execute([$istituto_id]);
@@ -163,7 +162,7 @@ $tipi_scuola_map = [
                             </p>
                         <?php endif; ?>
                         
-                        <?php if ($istituto['telefono']): ?>
+                        <?php if (isset($istituto['telefono']) && $istituto['telefono']): ?>
                             <p>
                                 <i class="bi bi-telephone"></i> 
                                 <?= htmlspecialchars($istituto['telefono']) ?>

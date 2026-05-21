@@ -9,6 +9,7 @@ $total_istituti = 0;
 $total_partner = 0;
 $total_enti = 0;
 $total_attivita = 0;
+$total_utenti_registrati = 0;
 
 try {
     // Ottieni attività pubblicate recenti
@@ -38,6 +39,19 @@ try {
 
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM attivita_eventi WHERE Stato = 'pubblicata'");
     $total_attivita = $stmt->fetch()['total'] ?? 0;
+
+    $userTable = null;
+    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+    if (in_array('utenti', $tables, true)) {
+        $userTable = 'utenti';
+    } elseif (in_array('utenti_finali', $tables, true)) {
+        $userTable = 'utenti_finali';
+    }
+
+    if ($userTable !== null) {
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM {$userTable}");
+        $total_utenti_registrati = (int)($stmt->fetch()['total'] ?? 0);
+    }
 } catch(PDOException $e) {
     // Se il database non è ancora configurato, mostra valori di default
     // L'utente vedrà la pagina ma senza dati
@@ -55,6 +69,7 @@ $translations = [
         'registrati' => 'Registrati',
         'accedi' => 'Accedi',
         'istituti' => 'Istituti',
+        'utenti_registrati' => 'Utenti registrati',
         'attivita' => 'Attività',
         'partecipanti' => 'Partecipanti',
         'prenota' => 'Prenota',
@@ -96,6 +111,7 @@ $translations = [
         'registrati' => 'Register',
         'accedi' => 'Login',
         'istituti' => 'Institutions',
+        'utenti_registrati' => 'Registered users',
         'attivita' => 'Activities',
         'partecipanti' => 'Participants',
         'prenota' => 'Book',
@@ -185,19 +201,19 @@ $t = $translations[$lang];
     </nav>
 
     <!-- Hero Section -->
-    <section class="bg-primary text-white py-5">
+    <section class="bg-primary text-white py-4">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4"><?= $t['hero_title'] ?></h1>
-                    <p class="lead mb-4"><?= $t['hero_subtitle'] ?></p>
+                    <h1 class="display-5 fw-bold mb-3 hero-title-fluo"><?= $t['hero_title'] ?></h1>
+                    <p class="lead mb-3 hero-subtitle-fluo"><?= $t['hero_subtitle'] ?></p>
                     <div class="d-flex gap-3">
                         <a href="register.php?lang=<?= $lang ?>" class="btn btn-light btn-lg"><?= $t['registrati'] ?></a>
                         <a href="attivita_elenco.php?lang=<?= $lang ?>" class="btn btn-outline-light btn-lg"><?= $t['scopri'] ?></a>
                     </div>
                 </div>
                 <div class="col-lg-6 text-center">
-                    <i class="bi bi-vr" style="font-size: 15rem; opacity: 0.3;"></i>
+                    <i class="bi bi-vr" style="font-size: 10rem; opacity: 0.3;"></i>
                 </div>
             </div>
         </div>
@@ -219,8 +235,8 @@ $t = $translations[$lang];
                     <p class="lead"><?= $t['attivita'] ?></p>
                 </div>
                 <div class="col-md-3">
-                    <h2 class="display-4 text-info"><i class="bi bi-vr"></i></h2>
-                    <p class="lead"><?= $t['vr'] ?></p>
+                    <h2 class="display-4 text-info"><?= $total_utenti_registrati ?></h2>
+                    <p class="lead"><?= $t['utenti_registrati'] ?></p>
                 </div>
                 <div class="col-md-3">
                     <h2 class="display-4 text-warning"><i class="bi bi-clock-history"></i></h2>

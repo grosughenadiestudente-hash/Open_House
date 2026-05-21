@@ -118,6 +118,15 @@ main {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 }
 
+.hero-title-fluo {
+    color: #73f0ff;
+    text-shadow: 0 0 14px rgba(115, 240, 255, 0.55);
+}
+
+.hero-subtitle-fluo {
+    color: #c8f7ff;
+}
+
 /* Statistics */
 .display-4 {
     font-weight: 700;
