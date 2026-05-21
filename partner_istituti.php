@@ -8,6 +8,12 @@ require_once 'config.php';
 
 $page_title = "Partner VR e FSL";
 
+function tableHasColumn(PDO $pdo, string $tableName, string $columnName): bool {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    $stmt->execute([$tableName, $columnName]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
 // Determina il tipo di visualizzazione
 $view_type = trim($_GET['view'] ?? 'tutti');  // partner_vr, partner_fsl, istituti, tutti
 $search = trim($_GET['search'] ?? '');
@@ -35,7 +41,10 @@ if ($view_type === '') {
 }
 
 try {
-    $query = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, i.Telefono, 
+    $hasTelefono = tableHasColumn($pdo, 'istituti_e_partner', 'Telefono');
+    $telefonoSelect = $hasTelefono ? 'i.Telefono' : 'NULL AS Telefono';
+
+    $query = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, {$telefonoSelect},
                      i.Indirizzo, i.Comune, i.Provincia, i.Regione, i.CF_PIVA,
                      i.Coordinate_GPS, i.Stato_Validazione
               FROM istituti_e_partner i
