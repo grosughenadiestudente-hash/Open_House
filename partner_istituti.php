@@ -8,6 +8,12 @@ require_once 'config.php';
 
 $page_title = "Partner VR e FSL";
 
+function tableHasColumn(PDO $pdo, string $tableName, string $columnName): bool {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    $stmt->execute([$tableName, $columnName]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
 // Determina il tipo di visualizzazione
 $view_type = trim($_GET['view'] ?? 'tutti');  // partner_vr, partner_fsl, istituti, tutti
 $search = trim($_GET['search'] ?? '');
@@ -35,7 +41,10 @@ if ($view_type === '') {
 }
 
 try {
-    $query = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, i.Telefono, 
+    $hasTelefono = tableHasColumn($pdo, 'istituti_e_partner', 'Telefono');
+    $telefonoSelect = $hasTelefono ? 'i.Telefono' : 'NULL AS Telefono';
+
+    $query = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, {$telefonoSelect},
                      i.Indirizzo, i.Comune, i.Provincia, i.Regione, i.CF_PIVA,
                      i.Coordinate_GPS, i.Stato_Validazione
               FROM istituti_e_partner i
@@ -99,27 +108,13 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?></title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-        }
-
         body {
             background: linear-gradient(135deg, #003d82 0%, #0066cc 50%, #0082e6 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 56px;
-        }
-
-        .navbar {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            z-index: 9999 !important;
         }
 
         main {
@@ -139,17 +134,17 @@ try {
         }
 
         .header-section img {
-            width: 100%;
-            max-height: 250px;
+            width: auto;
+            max-width: 100%;
+            max-height: 180px;
             object-fit: contain;
-            margin-bottom: 15px;
+            margin: 0 auto 15px;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
         }
 
         .header-section h1 {
             color: #0066cc;
             font-weight: 700;
-            font-size: 2rem;
             margin: 0;
         }
 
@@ -164,7 +159,6 @@ try {
         .view-selector label {
             font-weight: 600;
             margin-bottom: 10px;
-            font-size: 1rem;
             color: #003d82;
             display: block;
         }
@@ -174,7 +168,6 @@ try {
             background: white;
             border: 2px solid #0066cc;
             border-radius: 8px;
-            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -214,7 +207,6 @@ try {
         .filter-group label {
             font-weight: 600;
             margin-bottom: 8px;
-            font-size: 0.95rem;
             color: #003d82;
         }
         
@@ -223,7 +215,6 @@ try {
             padding: 12px;
             border: 2px solid #0066cc;
             border-radius: 8px;
-            font-size: 0.95rem;
             background: white;
             transition: all 0.3s;
         }
@@ -290,7 +281,6 @@ try {
         }
         
         .istituto-name {
-            font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 12px;
             color: #003d82;
@@ -364,7 +354,7 @@ try {
     
     <main class="container">
         <div class="header-section">
-            <img src="image/Logo.png" alt="Logo VR Open House">
+            <img src="image/Logo_ partner.png" alt="Logo Partner">
             <h1><?php echo htmlspecialchars($page_title); ?></h1>
         </div>
         

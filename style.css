@@ -118,6 +118,15 @@ main {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 }
 
+.hero-title-fluo {
+    color: #73f0ff;
+    text-shadow: 0 0 14px rgba(115, 240, 255, 0.55);
+}
+
+.hero-subtitle-fluo {
+    color: #c8f7ff;
+}
+
 /* Statistics */
 .display-4 {
     font-weight: 700;
@@ -257,4 +266,42 @@ footer {
 
 .badge.bg-secondary {
     background-color: var(--secondary-color) !important;
+}
+
+/* Typography normalization - consistent font sizes across pages */
+html {
+    font-size: 16px; /* base */
+}
+
+body {
+    font-size: 1rem; /* 16px */
+    line-height: 1.6;
+    color: #343a40;
+}
+
+.navbar-brand {
+    font-size: 1.25rem; /* 20px */
+}
+
+h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+h3 { font-size: 1.25rem; margin-bottom: 0.45rem; }
+h4 { font-size: 1.125rem; margin-bottom: 0.4rem; }
+h5 { font-size: 1rem; margin-bottom: 0.35rem; }
+h6 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+
+p, .lead { font-size: 1rem; }
+
+.btn { font-size: 0.95rem; }
+
+.table th, .table td { font-size: 0.95rem; }
+
+@media (min-width: 1200px) {
+    h1 { font-size: 2.25rem; }
+    h2 { font-size: 1.75rem; }
+}
+
+@media (max-width: 576px) {
+    html { font-size: 15px; }
+    .navbar-brand { font-size: 1.05rem; }
 }

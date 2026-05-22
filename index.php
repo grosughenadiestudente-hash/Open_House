@@ -9,6 +9,7 @@ $total_istituti = 0;
 $total_partner = 0;
 $total_enti = 0;
 $total_attivita = 0;
+$total_utenti_registrati = 0;
 
 try {
     // Ottieni attività pubblicate recenti
@@ -39,9 +40,18 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM attivita_eventi WHERE Stato = 'pubblicata'");
     $total_attivita = $stmt->fetch()['total'] ?? 0;
 
-    // Conta utenti finali
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM utenti WHERE tipo_utente IN ('studente', 'genitore')");
-    $total_users = (int)($stmt->fetch()['total'] ?? 0);
+    $userTable = null;
+    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+    if (in_array('utenti', $tables, true)) {
+        $userTable = 'utenti';
+    } elseif (in_array('utenti_finali', $tables, true)) {
+        $userTable = 'utenti_finali';
+    }
+
+    if ($userTable !== null) {
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM {$userTable}");
+        $total_utenti_registrati = (int)($stmt->fetch()['total'] ?? 0);
+    }
 } catch(PDOException $e) {
     // Se il database non è ancora configurato, mostra valori di default
     // L'utente vedrà la pagina ma senza dati
@@ -59,6 +69,7 @@ $translations = [
         'registrati' => 'Registrati',
         'accedi' => 'Accedi',
         'istituti' => 'Istituti',
+        'utenti_registrati' => 'Utenti registrati',
         'attivita' => 'Attività',
         'partecipanti' => 'Partecipanti',
         'prenota' => 'Prenota',
@@ -102,6 +113,7 @@ $translations = [
         'registrati' => 'Register',
         'accedi' => 'Login',
         'istituti' => 'Institutions',
+        'utenti_registrati' => 'Registered users',
         'attivita' => 'Activities',
         'partecipanti' => 'Participants',
         'prenota' => 'Book',
@@ -152,60 +164,22 @@ $t = $translations[$lang];
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> VR Open House</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="istituti_elenco.php?lang=<?= $lang ?>"><?= $t['istituti'] ?></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="attivita_elenco.php?lang=<?= $lang ?>"><?= $t['attivita'] ?></a>
-                    </li>
-                    <?php if (isLoggedIn()): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboard.php?lang=<?= $lang ?>">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="logout.php">Logout</a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="login.php?lang=<?= $lang ?>"><?= $t['accedi'] ?></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light" href="register.php?lang=<?= $lang ?>"><?= $t['registrati'] ?></a>
-                        </li>
-                    <?php endif; ?>
-                    <li class="nav-item">
-                        <a href="?lang=it" class="btn btn-sm btn-outline-light ms-2">IT</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="?lang=en" class="btn btn-sm btn-outline-light ms-2">EN</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- Hero Section -->
-    <section class="bg-primary text-white py-5">
+    <section class="bg-primary text-white py-4">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4" style="color: #1a3d5c;"><?= $t['hero_title'] ?></h1>
-                    <p class="lead mb-4"><?= $t['hero_subtitle'] ?></p>
+                    <h1 class="display-5 fw-bold mb-3 hero-title-fluo"><?= $t['hero_title'] ?></h1>
+                    <p class="lead mb-3 hero-subtitle-fluo"><?= $t['hero_subtitle'] ?></p>
                     <div class="d-flex gap-3">
                         <a href="register.php?lang=<?= $lang ?>" class="btn btn-light btn-lg"><?= $t['registrati'] ?></a>
                         <a href="attivita_elenco.php?lang=<?= $lang ?>" class="btn btn-outline-light btn-lg"><?= $t['scopri'] ?></a>
                     </div>
                 </div>
                 <div class="col-lg-6 text-center">
-                    <i class="bi bi-vr" style="font-size: 15rem; opacity: 0.3;"></i>
+                    <i class="bi bi-vr" style="font-size: 10rem; opacity: 0.3;"></i>
                 </div>
             </div>
         </div>
@@ -228,8 +202,12 @@ $t = $translations[$lang];
                     <p class="lead"><?= $t['attivita'] ?></p>
                 </div>
                 <div class="col-md-3">
-                    <h2 class="display-4 text-info"><?= $total_users ?></h2>
-                    <p class="lead"><?= $t['utenti_finali'] ?></p>
+                    <h2 class="display-4 text-info"><?= $total_utenti_registrati ?></h2>
+                    <p class="lead"><?= $t['utenti_registrati'] ?></p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-4 text-warning"><i class="bi bi-clock-history"></i></h2>
+                    <p class="lead"><?= $t['always_on'] ?></p>
                 </div>
             </div>
         </div>

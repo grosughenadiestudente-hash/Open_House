@@ -3,21 +3,35 @@ require_once 'config.php';
 
 echo "<h2>Inserimento Attivita: Simulatore Spaziale VR</h2>";
 
+function tableHasColumn(PDO $pdo, string $tableName, string $columnName): bool {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    $stmt->execute([$tableName, $columnName]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
 $partnerName = 'Prova Aeronautica';
 $partnerEmail = 'info@prova-aeronautica.it';
 $simUrl = 'https://www.flightsimulator.com/';
 $attivitaTitolo = 'Simulatore di Volo';
 
 try {
+    $hasTelefono = tableHasColumn($pdo, 'istituti_e_partner', 'Telefono');
+
     // Crea partner FSL se non esiste
     $stmt = $pdo->prepare("SELECT ID_Ente FROM istituti_e_partner WHERE Ragione_Sociale = ? LIMIT 1");
     $stmt->execute([$partnerName]);
     $partner = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$partner) {
-        $stmt = $pdo->prepare("INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Cod_REA, Telefono, Stato_Validazione)
-                               VALUES (?, 'AZIENDA', ?, 'Via del Volo 12', 'Catania', 'CT', 'SICILIA', 'CTAERO123', '095555555', 1)");
-        $stmt->execute([$partnerName, $partnerEmail]);
+        if ($hasTelefono) {
+            $stmt = $pdo->prepare("INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Cod_REA, Telefono, Stato_Validazione)
+                               VALUES (?, 'AZIENDA', ?, 'Via del Volo 12', 'Catania', 'CT', 'SICILIA', 'CTAERO123', NULL, 1)");
+            $stmt->execute([$partnerName, $partnerEmail]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Cod_REA, Stato_Validazione)
+                               VALUES (?, 'AZIENDA', ?, 'Via del Volo 12', 'Catania', 'CT', 'SICILIA', 'CTAERO123', 1)");
+            $stmt->execute([$partnerName, $partnerEmail]);
+        }
         $partnerId = (int) $pdo->lastInsertId();
         echo "✓ Partner FSL creato: {$partnerName}<br>";
     } else {

@@ -61,6 +61,7 @@ CREATE TABLE `istituti_e_partner` (
   `Indirizzo` varchar(255) DEFAULT NULL,
   `Comune` varchar(150) DEFAULT NULL,
   `Provincia` varchar(10) DEFAULT NULL,
+  `Telefono` varchar(50) DEFAULT NULL,
   `Regione` varchar(100) DEFAULT NULL,
   `Coordinate_GPS` varchar(100) DEFAULT NULL,
   `Email` varchar(255) DEFAULT NULL,
