@@ -3,8 +3,8 @@ require_once __DIR__ . '/../config.php';
 
 $codMecc = 'BGTF010003';
 $titolo = 'Laboratorio di robototecnica - Fab Listing';
-$descrizione = "Laboratorio di robototecnica organizzato da ITIS Pietro Paleocapa. Info/locandina: https://www.fab.com/listings/f5100f9e-a914-4f6c-b800-8c616be96801";
-$link = 'https://www.fab.com/listings/f5100f9e-a914-4f6c-b800-8c616be96801';
+$descrizione = "Laboratorio di robototecnica organizzato da ITIS Pietro Paleocapa. Modello 3D: https://sketchfab.com/3d-models/insect-mecha-a49db794b7a242feb85fa4ba427fa3bb";
+$link = 'https://sketchfab.com/3d-models/insect-mecha-a49db794b7a242feb85fa4ba427fa3bb';
 $dataOra = '2026-05-28 18:00:00';
 $maxPosti = 30;
 $tipo = 'laboratorio';

@@ -16,6 +16,7 @@
     <button id="play">Play</button>
     <button id="pause">Pause</button>
     <button id="export">Esporta JSON</button>
+    <label style="margin-left:8px">GLB: <input id="glbFile" type="file" accept=".glb,model/gltf-binary" style="display:inline-block;" /></label>
     <label>Frames: <input id="frames" type="number" value="60" min="10" max="600" style="width:64px"/></label>
     <br>
     <label><input type="checkbox" id="useExternal"> Usa `data/simulation.json` se presente</label>
@@ -24,21 +25,63 @@
   <div id="container"></div>
 
   <script src="https://unpkg.com/three@0.152.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.152.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/three@0.152.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
     // Simple procedural soft-tissue + needle demo and exporter
     const container = document.getElementById('container');
     const width = window.innerWidth, height = window.innerHeight;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 1000);
-    camera.position.set(0, -6, 6);
-    camera.up.set(0,0,1);
     const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.set(0,0,0);
+    const cameraState = {
+      distance: 9,
+      azimuth: -Math.PI / 2,
+      elevation: Math.PI / 4,
+      target: new THREE.Vector3(0, 0, 0)
+    };
+
+    function updateCameraPosition(){
+      const x = cameraState.target.x + cameraState.distance * Math.cos(cameraState.elevation) * Math.cos(cameraState.azimuth);
+      const y = cameraState.target.y + cameraState.distance * Math.cos(cameraState.elevation) * Math.sin(cameraState.azimuth);
+      const z = cameraState.target.z + cameraState.distance * Math.sin(cameraState.elevation);
+      camera.position.set(x, y, z);
+      camera.up.set(0, 0, 1);
+      camera.lookAt(cameraState.target);
+    }
+
+    updateCameraPosition();
+
+    let isDragging = false;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    renderer.domElement.addEventListener('pointerdown', (event)=>{
+      isDragging = true;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      renderer.domElement.setPointerCapture(event.pointerId);
+    });
+    renderer.domElement.addEventListener('pointermove', (event)=>{
+      if(!isDragging){ return; }
+      const deltaX = event.clientX - lastPointerX;
+      const deltaY = event.clientY - lastPointerY;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      cameraState.azimuth -= deltaX * 0.005;
+      cameraState.elevation = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, cameraState.elevation + deltaY * 0.005));
+      updateCameraPosition();
+    });
+    renderer.domElement.addEventListener('pointerup', (event)=>{
+      isDragging = false;
+      renderer.domElement.releasePointerCapture(event.pointerId);
+    });
+    renderer.domElement.addEventListener('wheel', (event)=>{
+      event.preventDefault();
+      cameraState.distance = Math.max(3, Math.min(25, cameraState.distance + event.deltaY * 0.01));
+      updateCameraPosition();
+    }, { passive: false });
 
     const light = new THREE.DirectionalLight(0xffffff, 0.9);
     light.position.set(5,5,10);
@@ -128,6 +171,30 @@
     let playHead = 0;
     let playing = true;
 
+    function normalizeFrame(frame){
+      if(!frame){ return null; }
+      const rawZs = Array.isArray(frame.zs) ? frame.zs : frame.zs?.value;
+      if(!Array.isArray(rawZs)){ return null; }
+      return {
+        needle: {
+          x: Number(frame.needle?.x ?? 0),
+          y: Number(frame.needle?.y ?? 0),
+          z: Number(frame.needle?.z ?? 0)
+        },
+        zs: rawZs.map((value)=>Number(value))
+      };
+    }
+
+    function normalizePayload(payload){
+      if(!payload || !Array.isArray(payload.frames)){ return null; }
+      const frames = payload.frames.map(normalizeFrame).filter(Boolean);
+      if(!frames.length){ return null; }
+      return {
+        meta: payload.meta || {},
+        frames
+      };
+    }
+
     function interpolateFrame(frameA, frameB, alpha){
       if(!frameA || !frameB){ return frameA || frameB; }
       const zs = new Array(frameA.zs.length);
@@ -201,9 +268,12 @@
         const resp = await fetch('data/simulation.json');
         if(!resp.ok) return false;
         const payload = await resp.json();
-        if(payload && payload.frames){
-          simFrames = payload.frames;
-          simMeta = payload.meta || { durationSec: 180 };
+        const normalized = normalizePayload(payload);
+        window.__lastNormalized = normalized;
+        console.log('imstk: normalized frames (auto):', normalized && normalized.frames && normalized.frames.length);
+        if(normalized){
+          simFrames = normalized.frames;
+          simMeta = normalized.meta || { durationSec: 180 };
           document.getElementById('useExternal').checked = true;
           playHead = 0;
           playing = false;
@@ -220,9 +290,12 @@
       reader.onload = ()=>{
         try{
           const payload = JSON.parse(reader.result);
-          if(payload && payload.frames){
-            simFrames = payload.frames;
-            simMeta = payload.meta || { durationSec: 180 };
+          const normalized = normalizePayload(payload);
+          window.__lastNormalized = normalized;
+          console.log('imstk: normalized frames (file):', normalized && normalized.frames && normalized.frames.length);
+          if(normalized){
+            simFrames = normalized.frames;
+            simMeta = normalized.meta || { durationSec: 180 };
             document.getElementById('useExternal').checked = true;
             playHead = 0;
             playing = false;
@@ -248,6 +321,42 @@
 
     // start
     animate();
+
+    // GLTF/GLB loader (file input)
+    let currentModel = null;
+    const glbInput = document.getElementById('glbFile');
+    glbInput.addEventListener('change', (ev)=>{
+      const f = ev.target.files[0]; if(!f) return;
+      const url = URL.createObjectURL(f);
+      loadGLBFromURL(url, () => { URL.revokeObjectURL(url); });
+    });
+
+    async function loadGLBFromURL(url, onLoaded){
+      try{
+        const loader = new THREE.GLTFLoader();
+        loader.load(url, (gltf)=>{
+          if(currentModel){ scene.remove(currentModel); }
+          currentModel = gltf.scene || gltf.scenes?.[0];
+          if(!currentModel) return;
+          // center and scale
+          const box = new THREE.Box3().setFromObject(currentModel);
+          const size = new THREE.Vector3(); box.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z) || 1;
+          const scale = 3.0 / maxDim;
+          currentModel.scale.setScalar(scale);
+          box.setFromObject(currentModel);
+          const center = new THREE.Vector3(); box.getCenter(center);
+          currentModel.position.sub(center);
+          scene.add(currentModel);
+          // move camera target to model center
+          cameraState.target.set(0,0,0);
+          updateCameraPosition();
+          if(typeof onLoaded === 'function') onLoaded();
+        }, undefined, (err)=>{
+          console.error('GLTF load error', err); if(typeof onLoaded==='function') onLoaded();
+        });
+      }catch(e){ console.error(e); if(typeof onLoaded==='function') onLoaded(); }
+    }
   </script>
 </body>
 </html>

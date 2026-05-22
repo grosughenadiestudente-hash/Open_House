@@ -83,36 +83,7 @@ $t = $translations[$lang];
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> Open House</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="dashboard_utente.php"><?= $t['dashboard'] ?></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="attivita_elenco.php?lang=<?= $lang ?>"><?= $t['attivita'] ?></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="profilo_utente.php?lang=<?= $lang ?>"><?= $t['profilo'] ?></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout.php"><?= $t['logout'] ?></a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="?lang=it" class="btn btn-sm btn-outline-light ms-2">IT</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="?lang=en" class="btn btn-sm btn-outline-light ms-2">EN</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <div class="container mt-4">
         <h2 class="mb-4">Benvenuto, <?= htmlspecialchars($_SESSION['user_name']) ?></h2>

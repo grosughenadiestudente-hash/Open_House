@@ -7,7 +7,7 @@ try {
     $codMecc = 'BGTF010003';
     $titolo = 'Simulazione WebXR - Braccio robotico 3D';
     $descrizione = 'Laboratorio di robototecnica con simulazione tecnica WebXR del braccio robotico in 3D, pensato per utenti registrati del portale e per l\'orientamento tecnologico.';
-    $linkWebxr = 'https://Novia-RDI-XR-Robotics.github.io/a-frame-xr-tutorial/';
+    $linkWebxr = 'https://sketchfab.com/3d-models/insect-mecha-a49db794b7a242feb85fa4ba427fa3bb';
     $dataOra = '2026-05-15 10:00:00';
 
     $stmt = $pdo->prepare("SELECT ID_Ente FROM istituti_e_partner WHERE Cod_Mecc = ? LIMIT 1");
