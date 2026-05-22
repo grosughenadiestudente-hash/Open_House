@@ -3,12 +3,6 @@ require_once 'config.php';
 
 echo "<h2>Crea partner 'FSL Medpark' e attività 'test chirurgico'</h2>\n";
 
-function tableHasColumn(PDO $pdo, string $tableName, string $columnName): bool {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
-    $stmt->execute([$tableName, $columnName]);
-    return (int)$stmt->fetchColumn() > 0;
-}
-
 $partnerName = 'FSL Medpark';
 $partnerEmail = 'info@fslmedpark.it';
 $attivitaTitolo = 'test chirurgico';

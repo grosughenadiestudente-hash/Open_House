@@ -8,12 +8,6 @@ require_once 'config.php';
 
 $page_title = "Partner VR e FSL";
 
-function tableHasColumn(PDO $pdo, string $tableName, string $columnName): bool {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
-    $stmt->execute([$tableName, $columnName]);
-    return (int)$stmt->fetchColumn() > 0;
-}
-
 // Determina il tipo di visualizzazione
 $view_type = trim($_GET['view'] ?? 'tutti');  // partner_vr, partner_fsl, istituti, tutti
 $search = trim($_GET['search'] ?? '');

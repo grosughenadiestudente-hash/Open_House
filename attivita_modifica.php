@@ -9,9 +9,9 @@ $istituto_id = $_SESSION['user_id'];
 // Verifica che l'attività appartenga all'istituto
 $stmt = $pdo->prepare("SELECT * FROM attivita_eventi WHERE ID_Attivita = ? AND FK_Ente_Organizzatore = ?");
 $stmt->execute([$attivita_id, $istituto_id]);
-$attivita = $stmt->fetch();
+$attivita = normalizeAttivitaRow($stmt->fetch() ?: []);
 
-if (!$attivita) {
+if (empty($attivita['titolo'])) {
     header('Location: attivita_gestione.php');
     exit;
 }
@@ -35,15 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Compila tutti i campi obbligatori';
     } else {
         try {
-            $stmt = $pdo->prepare("UPDATE attivita SET 
-                titolo = ?, descrizione = ?, tipo_attivita = ?, data_ora = ?, 
-                durata_minuti = ?, max_partecipanti = ?, supporta_vr = ?, 
-                url_vr = ?, materiali_url = ?, stato = ? 
-                WHERE id = ? AND istituto_id = ?");
+            $stmt = $pdo->prepare("UPDATE attivita_eventi SET
+                Titolo = ?, Descrizione = ?, Tipo_Attivita = ?, Data_Ora = ?,
+                Durata_Minuti = ?, Max_Posti = ?, Supporta_VR = ?,
+                Link_WebXR = ?, Materiali_URL = ?, Stato = ?
+                WHERE ID_Attivita = ? AND FK_Ente_Organizzatore = ?");
             $stmt->execute([
-                $titolo, $descrizione, $tipo_attivita, $data_ora, 
-                $durata_minuti, $max_partecipanti, $supporta_vr, 
-                $url_vr, $materiali_url, $stato, $attivita_id, $istituto_id
+                $titolo, $descrizione, $tipo_attivita, $data_ora,
+                $durata_minuti, $max_partecipanti, $supporta_vr,
+                $url_vr ?: null, $materiali_url ?: null, $stato, $attivita_id, $istituto_id
             ]);
             $success = 'Attività aggiornata con successo!';
             header('Location: attivita_gestione.php?lang=' . $lang);

@@ -2,8 +2,9 @@
 require_once 'config.php';
 
 $error = '';
-    $stmt->execute($params);
-}
+$success = '';
+$showSuccessPopup = false;
+$lang = $_GET['lang'] ?? 'it';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_type = $_POST['user_type'] ?? '';
@@ -19,6 +20,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'La password deve essere di almeno 8 caratteri.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Email non valida.';
+    } else {
+        try {
+            if ($user_type === 'utente') {
+                $nome = sanitize($_POST['utente_nome'] ?? '');
+                $cognome = sanitize($_POST['utente_cognome'] ?? '');
+                $tipo_utente = $_POST['utente_tipo'] ?? '';
+                $data_nascita = $_POST['utente_data_nascita'] ?? null;
+                $telefono = sanitize($_POST['utente_telefono'] ?? '');
+
+                if (empty($nome) || empty($cognome) || empty($tipo_utente)) {
+                    throw new RuntimeException('Compila tutti i campi obbligatori per utente finale.');
+                }
+
+                $userTable = getUserTable($pdo);
+                $stmt = $pdo->prepare("INSERT INTO {$userTable} (nome, cognome, email, password, tipo_utente, data_nascita, telefono) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    $nome,
+                    $cognome,
+                    $email,
+                    hashPassword($password),
+                    $tipo_utente,
+                    $data_nascita ?: null,
+                    $telefono ?: null,
+                ]);
+
+                $success = 'Registrazione completata. Controlla la tua email per la conferma.';
+                sendHtmlEmail(
+                    $email,
+                    'Conferma registrazione Open House',
+                    '<p>Ciao ' . htmlspecialchars($nome) . ',</p><p>la registrazione come ' . htmlspecialchars($tipo_utente) . ' e stata completata con successo.</p><p>Open House</p>'
+                );
+            } elseif ($user_type === 'istituto') {
+                $ragioneSociale = sanitize($_POST['istituto_ragione_sociale'] ?? '');
+                $tipologia = sanitize($_POST['istituto_tipologia'] ?? '');
+                $cfPiva = sanitize($_POST['istituto_cf_piva'] ?? '');
+                $codMecc = sanitize($_POST['istituto_cod_mecc'] ?? '');
+                $indirizzo = sanitize($_POST['istituto_indirizzo'] ?? '');
+                $comune = sanitize($_POST['istituto_comune'] ?? '');
+                $provincia = sanitize($_POST['istituto_provincia'] ?? '');
+                $regione = sanitize($_POST['istituto_regione'] ?? '');
+                $coordinate = sanitize($_POST['istituto_coordinate_gps'] ?? '');
+                $telefono = sanitize($_POST['istituto_telefono'] ?? '');
+                $descrizione = sanitize($_POST['istituto_descrizione'] ?? '');
+
+                if (empty($ragioneSociale) || empty($tipologia) || empty($provincia) || empty($regione)) {
+                    throw new RuntimeException('Compila tutti i campi obbligatori per istituto.');
+                }
+
+                insertIstitutoPartner($pdo, [
+                    'Ragione_Sociale' => $ragioneSociale,
+                    'Tipologia' => $tipologia,
+                    'CF_PIVA' => $cfPiva ?: null,
+                    'Cod_Mecc' => $codMecc ?: null,
+                    'Cod_REA' => null,
+                    'Indirizzo' => $indirizzo ?: null,
+                    'Comune' => $comune ?: null,
+                    'Provincia' => $provincia,
+                    'Regione' => $regione,
+                    'Coordinate_GPS' => $coordinate ?: null,
+                    'Email' => $email,
+                    'Telefono' => $telefono ?: null,
                     'descrizione' => $descrizione ?: null,
                     'password' => hashPassword($password),
                 ]);
@@ -90,6 +152,8 @@ $translations = [
         'title' => 'Registrazione - Open House',
         'register' => 'Registrati',
         'user_type' => 'Tipo utente',
+        'istituto' => 'Istituto',
+        'utente' => 'Utente',
         'partner' => 'Partner VR/FSL',
         'nome' => 'Nome',
         'cognome' => 'Cognome',
@@ -147,7 +211,69 @@ $t = $translations[$lang];
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
-    <?php include 'navbar.php'; ?>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> Open House</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?lang=<?= $lang ?>">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="istituti_elenco.php?lang=<?= $lang ?>">Istituti</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="partner_istituti.php?lang=<?= $lang ?>">🥽 Partner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#chiSiamoModal">Chi siamo</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item ms-3">
+                        <a href="?lang=it" class="btn btn-outline-light btn-sm <?= $lang === 'it' ? 'active' : '' ?>">IT</a>
+                    </li>
+                    <li class="nav-item ms-1">
+                        <a href="?lang=en" class="btn btn-outline-light btn-sm <?= $lang === 'en' ? 'active' : '' ?>">EN</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal "Chi siamo" -->
+    <div class="modal fade" id="chiSiamoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi Siamo - VR Open House</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="image/745d5f52-0e02-42ee-b3f5-1a39e2aa9f9a.webp" alt="VR Open House" class="img-fluid mb-3" style="max-height: 300px; object-fit: cover;">
+                    <div class="text-muted" style="font-size: 0.95rem; line-height: 1.6; max-height: 400px; overflow-y: auto;">
+                        <h6><strong>L'innovazione al servizio dell'orientamento scolastico e della formazione</strong></h6>
+                        <p>Negli ultimi anni, l'evoluzione tecnologica ha trasformato radicalmente i paradigmi della comunicazione e della formazione. Tra le innovazioni più significative, la Realtà Virtuale (VR) si è imposta come uno strumento capace di abbattere i confini tra spazio fisico e digitale, rivoluzionando il modo in cui viviamo eventi e attività didattiche.</p>
+                        
+                        <h6><strong>La Visione del Progetto</strong></h6>
+                        <p>L'obiettivo primario è la creazione di un ecosistema digitale intuitivo che consenta agli Istituti di ogni ordine e grado di superare i limiti della presenza fisica. La piattaforma non è un semplice sito vetrina, ma un vero e proprio hub immersivo.</p>
+                        
+                        <h6><strong>Inclusività e Accessibilità</strong></h6>
+                        <p>Uno dei punti di forza del sistema risiede nella sua capacità di favorire l'inclusione sociale e territoriale. Con VR Open House, studenti fuori sede, persone con mobilità ridotta e famiglie con poco tempo possono visitare l'istituto senza affrontare lunghi viaggi.</p>
+                        
+                        <h6><strong>Innovazione e Visibilità per gli Istituti</strong></h6>
+                        <p>Per gli istituti, aderire a VR Open House rappresenta un'opportunità strategica di marketing territoriale. La piattaforma offre una vetrina internazionale che potenzia la visibilità e l'attrattiva verso i futuri iscritti.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container mt-5 mb-5">
         <div class="row justify-content-center">

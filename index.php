@@ -12,7 +12,7 @@ $total_attivita = 0;
 $total_utenti_registrati = 0;
 
 try {
-    // Ottieni attività pubblicate recenti
+    // Tutte le attività pubblicate (passate e future)
     $stmt = $pdo->prepare("SELECT a.ID_Attivita as id, a.Titolo as titolo, a.Descrizione as descrizione, 
                            a.Data_Ora as data_ora, a.Supporta_VR as supporta_vr, a.Max_Posti as max_partecipanti,
                            i.Ragione_Sociale as istituto_nome, i.Tipologia as tipo_scuola,
@@ -20,11 +20,9 @@ try {
                            FROM attivita_eventi a 
                            JOIN istituti_e_partner i ON a.FK_Ente_Organizzatore = i.ID_Ente 
                            LEFT JOIN prenotazioni p ON a.ID_Attivita = p.attivita_id AND p.stato = 'confermata'
-                           WHERE a.Stato = 'pubblicata' 
-                           AND a.Data_Ora > NOW()
+                           WHERE a.Stato = 'pubblicata'
                            GROUP BY a.ID_Attivita 
-                           ORDER BY a.Data_Ora ASC 
-                           LIMIT 6");
+                           ORDER BY a.Data_Ora ASC");
     $stmt->execute();
     $attivita_featured = $stmt->fetchAll();
 

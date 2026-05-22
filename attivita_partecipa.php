@@ -5,17 +5,6 @@ requireLogin();
 $lang = $_GET['lang'] ?? 'it';
 $attivita_id = $_GET['id'] ?? 0;
 
-function getUserTable(PDO $pdo): ?string {
-    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    if (in_array('utenti', $tables, true)) {
-        return 'utenti';
-    }
-    if (in_array('utenti_finali', $tables, true)) {
-        return 'utenti_finali';
-    }
-    return null;
-}
-
 // Verifica che l'utente abbia prenotato
 if ($_SESSION['user_type'] === 'utente') {
     $stmt = $pdo->prepare("SELECT id FROM prenotazioni WHERE utente_id = ? AND attivita_id = ? AND stato = 'confermata'");
@@ -41,7 +30,7 @@ if (!$attivita) {
 }
 
 // Carica messaggi chat
-$userTable = getUserTable($pdo);
+$userTable = getUserTable($pdo, false);
 $userJoin = $userTable ? "LEFT JOIN {$userTable} u ON m.utente_id = u.id" : '';
 $userSelect = $userTable ? 'u.nome as utente_nome' : 'NULL as utente_nome';
 
