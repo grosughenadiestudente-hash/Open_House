@@ -1,10 +1,10 @@
 /* Stili per Open Day Virtuale Platform */
 
 :root {
-    --primary-color: #092981;
-    --header-color: #092981;
-    --bs-primary: #092981;
-    --bs-primary-rgb: 9, 41, 129;
+    --primary-color: #003366;
+    --header-color: #003366;
+    --bs-primary: #003366;
+    --bs-primary-rgb: 0, 51, 102;
     --secondary-color: #6c757d;
     --success-color: #198754;
     --info-color: #0dcaf0;
@@ -38,12 +38,16 @@ main {
 }
 
 .navbar-brand {
-    font-weight: bold;
-    font-size: 1.5rem;
+    font-weight: 700;
+    font-size: 1.65rem;
+    letter-spacing: 0.2px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .site-header.bg-primary,
 .navbar.bg-primary,
+.site-header.bg-dark,
+.navbar.bg-dark,
 .navbar.site-header {
     background: var(--header-color) !important;
     background-color: var(--header-color) !important;

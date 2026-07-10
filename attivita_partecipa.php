@@ -57,12 +57,11 @@ $messaggi = $stmt->fetchAll();
     <?php endif; ?>
 </head>
 <body class="bg-dark text-white">
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <span class="navbar-brand"><?= htmlspecialchars($attivita['titolo']) ?></span>
-            <a href="attivita_dettaglio.php?id=<?= $attivita_id ?>&lang=<?= $lang ?>" class="btn btn-outline-light btn-sm">Esci</a>
-        </div>
-    </nav>
+    <?php include 'navbar.php'; ?>
+
+    <div class="container-fluid mt-3">
+        <a href="attivita_dettaglio.php?id=<?= $attivita_id ?>&lang=<?= $lang ?>" class="btn btn-outline-light btn-sm">Esci</a>
+    </div>
 
     <div class="container-fluid mt-3">
         <div class="row">

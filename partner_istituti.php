@@ -345,7 +345,7 @@ try {
     </style>
 </head>
 <body class="partner-page">
-    <?php $active_page = 'partner'; include 'header.php'; ?>
+    <?php include 'navbar.php'; ?>
     
     <main class="container">
         <div class="header-section">
