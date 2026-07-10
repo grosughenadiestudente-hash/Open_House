@@ -7,6 +7,7 @@
 require_once 'config.php';
 
 $page_title = "Partner VR e FSL";
+$lang = $_GET['lang'] ?? 'it';
 
 // Determina il tipo di visualizzazione
 $view_type = trim($_GET['view'] ?? 'tutti');  // partner_vr, partner_fsl, istituti, tutti
@@ -93,274 +94,17 @@ try {
 ?>
 
 <!DOCTYPE html>
-<html lang="it">
+<html lang="<?= htmlspecialchars($lang) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: linear-gradient(135deg, #003d82 0%, #0066cc 50%, #0082e6 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 56px;
-        }
-
-        .navbar {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            z-index: 9999 !important;
-        }
-
-        main {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            margin: 30px auto;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            max-width: 1400px;
-        }
-
-        .header-section {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 30px;
-            border-bottom: 3px solid #0066cc;
-        }
-
-        .header-section img {
-            width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-        }
-
-        .header-section h1 {
-            color: #0066cc;
-            font-weight: 700;
-            font-size: 2rem;
-            margin: 0;
-        }
-
-        .view-selector {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f0f4f9 0%, #e8eef5 100%);
-            border: 2px solid #0066cc;
-            border-radius: 12px;
-        }
-
-        .view-selector label {
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 1rem;
-            color: #003d82;
-            display: block;
-        }
-
-        .view-selector select {
-            padding: 12px 16px;
-            background: white;
-            border: 2px solid #0066cc;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #003d82;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .view-selector select:hover,
-        .view-selector select:focus {
-            outline: none;
-            border-color: #003d82;
-            box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
-            background-color: #f0f4f9;
-        }
-
-        .filter-section {
-            background: linear-gradient(135deg, #f0f4f9 0%, #e8eef5 100%);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border: 2px solid #0066cc;
-        }
-        
-        .filter-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            align-items: end;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .filter-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-            color: #003d82;
-        }
-        
-        .filter-group input,
-        .filter-group select {
-            padding: 12px;
-            border: 2px solid #0066cc;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: white;
-            transition: all 0.3s;
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: #003d82;
-            box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
-        }
-        
-        .btn-filter {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-filter:hover {
-            background: linear-gradient(135deg, #0052a3 0%, #003d82 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
-        }
-        
-        .btn-reset {
-            padding: 12px 24px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-reset:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-        
-        .istituti-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .istituto-card {
-            background: white;
-            border: 2px solid #e8eef5;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.1);
-            transition: all 0.3s;
-        }
-        
-        .istituto-card:hover {
-            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.2);
-            transform: translateY(-4px);
-            border-color: #0066cc;
-        }
-        
-        .istituto-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #003d82;
-        }
-        
-        .istituto-type {
-            display: inline-block;
-            padding: 6px 14px;
-            background: linear-gradient(135deg, #e8f0ff 0%, #d4e3ff 100%);
-            color: #0052a3;
-            border: 1px solid #0066cc;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .istituto-info {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #666;
-        }
-        
-        .istituto-info p {
-            margin: 8px 0;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            color: #666;
-        }
-        
-        .results-count {
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #003d82;
-        }
-
-        .btn-detail {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
-        }
-
-        .btn-detail:hover {
-            background: linear-gradient(135deg, #0052a3 0%, #003d82 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
-        }
-    </style>
 </head>
-<body>
-    <?php include 'navbar.php'; ?>
+<body class="partner-page">
+    <?php $active_page = 'partner'; include 'header.php'; ?>
     
     <main class="container">
         <div class="header-section">
@@ -370,14 +114,15 @@ try {
         
         <!-- Filtri -->
         <form method="GET" class="filter-section">
+            <input type="hidden" name="lang" value="<?php echo htmlspecialchars($lang); ?>">
             <!-- Selezione tipo visualizzazione -->
             <div class="view-selector">
                 <label for="viewType">Seleziona cosa visualizzare:</label>
                 <select id="viewType" name="view" onchange="this.form.submit()">
                     <option value="">Seleziona</option>
-                    <option value="partner_vr" <?php echo ($view_type === 'partner_vr') ? 'selected' : ''; ?>>🥽 Partner VR</option>
-                    <option value="partner_fsl" <?php echo ($view_type === 'partner_fsl') ? 'selected' : ''; ?>>📚 Partner FSL</option>
-                    <option value="istituti" <?php echo ($view_type === 'istituti') ? 'selected' : ''; ?>>🏫 Istituti</option>
+                        <option value="partner_vr" <?php echo ($view_type === 'partner_vr') ? 'selected' : ''; ?>>🥽 Partner VR</option>
+                        <option value="partner_fsl" <?php echo ($view_type === 'partner_fsl') ? 'selected' : ''; ?>>📚 Partner FSL</option>
+                        <option value="istituti" <?php echo ($view_type === 'istituti') ? 'selected' : ''; ?>>🏫 Istituti</option>
                 </select>
             </div>
             
@@ -406,20 +151,19 @@ try {
                 </div>
                 
                 <div class="filter-group">
-                    <a href="?view=<?php echo htmlspecialchars($view_type); ?>" class="btn-reset" 
-                       style="text-align: center; text-decoration: none;">Azzera Filtri</a>
+                    <a href="?view=<?php echo htmlspecialchars($view_type); ?>&lang=<?php echo htmlspecialchars($lang); ?>" class="btn-reset">Azzera Filtri</a>
                 </div>
             </div>
         </form>
 
         <!-- Risultati -->
         <?php if (isset($info)): ?>
-            <div style="background: #e7f3ff; color: #0b3d91; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <div class="partner-alert-info">
                 <?php echo htmlspecialchars($info); ?>
             </div>
         <?php endif; ?>
         <?php if (isset($error)): ?>
-            <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <div class="partner-alert-error">
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
@@ -481,7 +225,7 @@ try {
                             <?php endif; ?>
                         </div>
                         
-                        <a href="istituto_dettaglio.php?id=<?php echo $istituto['ID_Ente']; ?>" class="btn-detail">
+                        <a href="istituto_dettaglio.php?id=<?php echo $istituto['ID_Ente']; ?>&lang=<?php echo htmlspecialchars($lang); ?>" class="btn-detail">
                             Visualizza Dettagli →
                         </a>
                         </div>
@@ -491,7 +235,7 @@ try {
         <?php endif; ?>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Inizializza il dropdown del view_type con il valore corretto
         document.addEventListener('DOMContentLoaded', function() {

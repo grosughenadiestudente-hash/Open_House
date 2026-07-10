@@ -44,18 +44,7 @@ $attivita = $stmt->fetchAll();
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
-    <?php if (isLoggedIn()): include 'navbar.php'; else: ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> Open House</a>
-                <div class="d-flex">
-                    <a href="login.php?lang=<?= $lang ?>" class="btn btn-outline-light btn-sm me-2">Login</a>
-                    <a href="?lang=it" class="btn btn-sm btn-outline-light me-2">IT</a>
-                    <a href="?lang=en" class="btn btn-sm btn-outline-light">EN</a>
-                </div>
-            </div>
-        </nav>
-    <?php endif; ?>
+    <?php if (isLoggedIn()): include 'navbar.php'; else: $active_page = 'attivita'; include 'header.php'; endif; ?>
 
     <div class="container mt-4 mb-5">
         <h2 class="mb-4">Attività Disponibili</h2>

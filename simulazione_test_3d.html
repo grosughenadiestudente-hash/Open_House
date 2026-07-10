@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#07111b">
+    <title>Test 3D - Open House</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07111b;
+        --panel: rgba(8, 18, 28, 0.88);
+        --panel-border: rgba(170, 214, 255, 0.16);
+        --text: #eff7ff;
+        --muted: #b7c8d8;
+        --accent: #67d8ff;
+        --accent-strong: #8be78b;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background:
+          radial-gradient(circle at top, rgba(103, 216, 255, 0.16), transparent 32%),
+          linear-gradient(180deg, #07111b 0%, #050b12 100%);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      .app {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        grid-template-columns: minmax(290px, 380px) 1fr;
+      }
+
+      .panel {
+        z-index: 2;
+        padding: clamp(1rem, 2vw, 1.5rem);
+        background: linear-gradient(180deg, rgba(8, 18, 28, 0.96), rgba(8, 18, 28, 0.84));
+        backdrop-filter: blur(14px);
+        border-right: 1px solid var(--panel-border);
+      }
+
+      .eyebrow {
+        margin: 0 0 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 0.76rem;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.9rem, 3vw, 2.8rem);
+        line-height: 1;
+      }
+
+      .lead {
+        margin: 0.9rem 0 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem 0 1.25rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        font-size: 0.84rem;
+      }
+
+      .pill.ok {
+        border-color: rgba(139, 231, 139, 0.28);
+        color: #c7ffd7;
+      }
+
+      .steps {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      .step {
+        padding: 0.95rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .step strong {
+        display: block;
+        margin-bottom: 0.25rem;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .scene-shell {
+        position: relative;
+        min-width: 0;
+      }
+
+      .scene-shell a-scene {
+        position: absolute !important;
+        inset: 0;
+      }
+
+      .hud {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 3;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: end;
+        pointer-events: none;
+      }
+
+      .hud-card {
+        pointer-events: auto;
+        max-width: 34rem;
+        padding: 0.9rem 1rem;
+        border-radius: 16px;
+        background: rgba(4, 11, 18, 0.66);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+      }
+
+      .hud-card p {
+        margin: 0.25rem 0 0;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .button-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+      }
+
+      .action {
+        appearance: none;
+        border: 0;
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        font: inherit;
+        font-weight: 700;
+        color: #06111b;
+        background: linear-gradient(135deg, var(--accent) 0%, #d4f7ff 100%);
+        cursor: pointer;
+      }
+
+      .action.secondary {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      @media (max-width: 980px) {
+        body {
+          overflow: auto;
+        }
+
+        .app {
+          position: relative;
+          grid-template-columns: 1fr;
+          min-height: 100vh;
+        }
+
+        .panel {
+          border-right: 0;
+          border-bottom: 1px solid var(--panel-border);
+        }
+
+        .scene-shell {
+          min-height: 72vh;
+        }
+
+        .hud {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .button-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel">
+        <p class="eyebrow">Open House 3D</p>
+        <h1>Test 3D</h1>
+        <p class="lead">Anteprima del modello <strong>AttenuationTest.glb</strong> inserito nell'attività dedicata. Usa i controlli per ruotare, zoomare e spostarti nella scena.</p>
+
+        <div class="status-row">
+          <span class="pill ok">GLB locale</span>
+          <span class="pill">Orbit controls</span>
+          <span class="pill">Mobile friendly</span>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <strong>1. Ruota</strong>
+            <p>Trascina con il mouse o con il dito per osservare il modello da ogni lato.</p>
+          </div>
+          <div class="step">
+            <strong>2. Avvicina</strong>
+            <p>Usa la rotella del mouse o il pinch sul touch per cambiare distanza.</p>
+          </div>
+          <div class="step">
+            <strong>3. Esplora</strong>
+            <p>Premi il pulsante VR se vuoi aprire la scena in modalità immersiva.</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="scene-shell">
+        <a-scene embedded background="color: #07111b" renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true" vr-mode-ui="enabled: true">
+          <a-assets>
+            <a-asset-item id="attenuationModel" src="mdeli%203d/AttenuationTest.glb"></a-asset-item>
+          </a-assets>
+
+          <a-entity light="type: ambient; intensity: 0.95; color: #ffffff"></a-entity>
+          <a-entity light="type: directional; intensity: 1.0" position="1.5 3 2"></a-entity>
+          <a-entity light="type: directional; intensity: 0.6" position="-2 1 1"></a-entity>
+
+          <a-plane rotation="-90 0 0" width="30" height="30" color="#0d1724"></a-plane>
+          <a-entity position="0 0 -1.6" rotation="0 25 0" scale="1.15 1.15 1.15" gltf-model="#attenuationModel"></a-entity>
+
+          <a-entity position="0 1.55 2.8">
+            <a-entity camera look-controls="reverseMouseDrag: false" wasd-controls="enabled: false"></a-entity>
+          </a-entity>
+        </a-scene>
+
+        <div class="hud">
+          <div class="hud-card">
+            <strong>Modello locale caricato</strong>
+            <p>Il file viene servito dalla cartella <em>mdeli 3d</em> e può essere riusato anche come allegato nell'attività.</p>
+          </div>
+          <div class="hud-card">
+            <div class="button-row">
+              <button class="action" onclick="document.querySelector('a-scene').enterVR && document.querySelector('a-scene').enterVR()">Enter VR</button>
+              <button class="action secondary" onclick="location.reload()">Reset</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

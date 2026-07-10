@@ -43,7 +43,7 @@ $translations = [
     'it' => [
         'title' => 'VR Open House - Orientamento Immersivo',
         'hero_title' => 'VR Open House',
-        'hero_subtitle' => 'Orientamento scolastico e FSL in ambienti immersivi WebXR, accessibili da casa o in Arena VR',
+        'hero_subtitle' => 'Un mondo nuovo per avvicinare studenti, famiglie, scuola e lavoro',
         'scopri' => 'Scopri le Attività',
         'registrati' => 'Registrati',
         'accedi' => 'Accedi',
@@ -137,45 +137,7 @@ $t = $translations[$lang];
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> VR Open House</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="istituti_elenco.php?lang=<?= $lang ?>"><?= $t['istituti'] ?></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="attivita_elenco.php?lang=<?= $lang ?>"><?= $t['attivita'] ?></a>
-                    </li>
-                    <?php if (isLoggedIn()): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboard.php?lang=<?= $lang ?>">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="logout.php">Logout</a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="login.php?lang=<?= $lang ?>"><?= $t['accedi'] ?></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light" href="register.php?lang=<?= $lang ?>"><?= $t['registrati'] ?></a>
-                        </li>
-                    <?php endif; ?>
-                    <li class="nav-item">
-                        <a href="?lang=it" class="btn btn-sm btn-outline-light ms-2">IT</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="?lang=en" class="btn btn-sm btn-outline-light ms-2">EN</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php $active_page = 'home'; include 'header.php'; ?>
 
     <!-- Hero Section -->
     <section class="bg-primary text-white py-5">

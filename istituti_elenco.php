@@ -35,21 +35,23 @@ $tipologia_db = !empty($tipologia_ente) && isset($tipologie_map[$tipologia_ente]
 $query = "SELECT i.*, i.ID_Ente as id, i.Ragione_Sociale as nome, i.Tipologia as tipo_scuola, i.Cod_Mecc as codice_istituto,
                  i.Indirizzo as indirizzo, i.Provincia as provincia, i.Regione as regione, i.Comune as comune,
                  NULL as descrizione,
-                 COUNT(DISTINCT a.ID_Attivita) as totale_attivita, COUNT(DISTINCT p.id) as totale_prenotazioni
-          FROM istituti_e_partner i 
-          LEFT JOIN attivita_eventi a ON i.ID_Ente = a.FK_Ente_Organizzatore AND a.Stato = 'pubblicata'
-          LEFT JOIN prenotazioni p ON a.ID_Attivita = p.attivita_id AND p.stato = 'confermata'
+                 (SELECT COUNT(*) FROM attivita_eventi a
+                  WHERE a.FK_Ente_Organizzatore = i.ID_Ente AND a.Stato = 'pubblicata') as totale_attivita,
+                 (SELECT COUNT(*) FROM prenotazioni p
+                  INNER JOIN attivita_eventi a ON p.attivita_id = a.ID_Attivita
+                  WHERE a.FK_Ente_Organizzatore = i.ID_Ente AND p.stato = 'confermata') as totale_prenotazioni
+          FROM istituti_e_partner i
           WHERE 1=1";
 
 $params = [];
 
 if (!empty($regione)) {
-    $query .= " AND i.regione = ?";
+    $query .= " AND i.Regione = ?";
     $params[] = $regione;
 }
 
 if (!empty($provincia)) {
-    $query .= " AND i.provincia = ?";
+    $query .= " AND i.Provincia = ?";
     $params[] = $provincia;
 }
 
@@ -59,24 +61,24 @@ if (!empty($tipologia_db)) {
 }
 
 if (!empty($search)) {
-    $query .= " AND (i.Ragione_Sociale LIKE ? OR i.indirizzo LIKE ? OR i.comune LIKE ?)";
+    $query .= " AND (i.Ragione_Sociale LIKE ? OR i.Indirizzo LIKE ? OR i.Comune LIKE ?)";
     $searchParam = "%$search%";
     $params[] = $searchParam;
     $params[] = $searchParam;
     $params[] = $searchParam;
 }
 
-$query .= " GROUP BY i.ID_Ente ORDER BY i.Ragione_Sociale ASC";
+$query .= " ORDER BY i.Ragione_Sociale ASC";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $istituti = $stmt->fetchAll();
 
 // Ottieni regioni e province uniche per i filtri
-$stmt = $pdo->query("SELECT DISTINCT regione FROM istituti_e_partner WHERE regione IS NOT NULL AND regione != '' ORDER BY regione");
+$stmt = $pdo->query("SELECT DISTINCT Regione FROM istituti_e_partner WHERE Regione IS NOT NULL AND Regione != '' ORDER BY Regione");
 $regioni = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-$stmt = $pdo->query("SELECT DISTINCT provincia FROM istituti_e_partner WHERE provincia IS NOT NULL AND provincia != '' ORDER BY provincia");
+$stmt = $pdo->query("SELECT DISTINCT Provincia FROM istituti_e_partner WHERE Provincia IS NOT NULL AND Provincia != '' ORDER BY Provincia");
 $province = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 $translations = [
@@ -169,19 +171,7 @@ $tipologie_ente_map = [
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
-    <?php if (isLoggedIn()): include 'navbar.php'; else: ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> Open House</a>
-                <div class="d-flex">
-                    <a href="index.php?lang=<?= $lang ?>" class="btn btn-outline-light btn-sm me-2">Home</a>
-                    <a href="login.php?lang=<?= $lang ?>" class="btn btn-outline-light btn-sm me-2">Login</a>
-                    <a href="?lang=it" class="btn btn-sm btn-outline-light me-2">IT</a>
-                    <a href="?lang=en" class="btn btn-sm btn-outline-light">EN</a>
-                </div>
-            </div>
-        </nav>
-    <?php endif; ?>
+    <?php if (isLoggedIn()): include 'navbar.php'; else: $active_page = 'istituti'; include 'header.php'; endif; ?>
 
     <div class="container mt-4 mb-5">
         <h2 class="mb-4"><?= $t['cerca_istituti'] ?></h2>
