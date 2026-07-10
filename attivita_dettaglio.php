@@ -48,103 +48,16 @@ $posti_disponibili = $attivita['max_partecipanti'] - $attivita['prenotazioni_cou
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($attivita['titolo']) ?></title>
+    <title>Partecipa - <?= htmlspecialchars($attivita['titolo']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            background-image: url('image/modern futuristic learning center.webp');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            pointer-events: none;
-            z-index: -1;
-        }
-    </style>
-</head>
-<body>
-    <?php if (isLoggedIn()): include 'navbar.php'; else: ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="index.php"><i class="bi bi-mortarboard"></i> Open House</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?lang=<?= $lang ?>">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="istituti_elenco.php?lang=<?= $lang ?>">Istituti</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="partner_istituti.php?lang=<?= $lang ?>">🥽 Partner</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#chiSiamoModal">Chi siamo</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item ms-2">
-                            <a href="login.php?lang=<?= $lang ?>" class="btn btn-light btn-sm">Accedi</a>
-                        </li>
-                        <li class="nav-item ms-2">
-                            <a href="register.php?lang=<?= $lang ?>" class="btn btn-light btn-sm">Registrati</a>
-                        </li>
-                        <li class="nav-item ms-3">
-                            <a href="?lang=it" class="btn btn-outline-light btn-sm <?= $lang === 'it' ? 'active' : '' ?>">IT</a>
-                        </li>
-                        <li class="nav-item ms-1">
-                            <a href="?lang=en" class="btn btn-outline-light btn-sm <?= $lang === 'en' ? 'active' : '' ?>">EN</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Modal "Chi siamo" -->
-        <div class="modal fade" id="chiSiamoModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Chi Siamo - VR Open House</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <img src="image/745d5f52-0e02-42ee-b3f5-1a39e2aa9f9a.webp" alt="VR Open House" class="img-fluid mb-3" style="max-height: 300px; object-fit: cover;">
-                        <div class="text-muted" style="font-size: 0.95rem; line-height: 1.6; max-height: 400px; overflow-y: auto;">
-                            <h6><strong>L'innovazione al servizio dell'orientamento scolastico e della formazione</strong></h6>
-                            <p>Negli ultimi anni, l'evoluzione tecnologica ha trasformato radicalmente i paradigmi della comunicazione e della formazione. Tra le innovazioni più significative, la Realtà Virtuale (VR) si è imposta come uno strumento capace di abbattere i confini tra spazio fisico e digitale, rivoluzionando il modo in cui viviamo eventi e attività didattiche.</p>
-                            
-                            <h6><strong>La Visione del Progetto</strong></h6>
-                            <p>L'obiettivo primario è la creazione di un ecosistema digitale intuitivo che consenta agli Istituti di ogni ordine e grado di superare i limiti della presenza fisica. La piattaforma non è un semplice sito vetrina, ma un vero e proprio hub immersivo.</p>
-                            
-                            <h6><strong>Inclusività e Accessibilità</strong></h6>
-                            <p>Uno dei punti di forza del sistema risiede nella sua capacità di favorire l'inclusione sociale e territoriale. Con VR Open House, studenti fuori sede, persone con mobilità ridotta e famiglie con poco tempo possono visitare l'istituto senza affrontare lunghi viaggi.</p>
-                            
-                            <h6><strong>Innovazione e Visibilità per gli Istituti</strong></h6>
-                            <p>Per gli istituti, aderire a VR Open House rappresenta un'opportunità strategica di marketing territoriale. La piattaforma offre una vetrina internazionale che potenzia la visibilità e l'attrattiva verso i futuri iscritti.</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <?php if ($attivita['supporta_vr'] && $attivita['link_webxr']): ?>
+        <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <?php endif; ?>
+</head>
+<body class="bg-light">
+    <?php include 'navbar.php'; ?>
 
     <div class="container mt-4 mb-5">
         <?php if ($flash_success): ?>
@@ -187,11 +100,15 @@ $posti_disponibili = $attivita['max_partecipanti'] - $attivita['prenotazioni_cou
                         <?php if (isLoggedIn() && $_SESSION['user_type'] === 'utente' && !empty($attivita['link_webxr'])): ?>
                             <hr>
                             <div class="d-grid gap-2">
-                                <?php $btnLabel = $attivita['link_webxr'] === 'https://www.flightsimulator.com/'
-                                    ? '✈️ Simulatore di Volo'
-                                    : 'Apri simulazione WebXR'; ?>
-                                <a href="<?= htmlspecialchars($attivita['link_webxr']) ?>" class="btn btn-success" target="_blank" rel="noopener noreferrer">
-                                    <i class="bi bi-box-arrow-up-right"></i> <?= $btnLabel ?>
+                                <?php
+                                    // Per i laboratori di Chimica, forziamo il link verso Molecular WebXR
+                                    $webxrUrl = $attivita['link_webxr'];
+                                    if (!empty($attivita['titolo']) && stripos($attivita['titolo'], 'chimic') !== false) {
+                                        $webxrUrl = 'https://molecularwebxr.org/app';
+                                    }
+                                ?>
+                                <a href="<?= htmlspecialchars($webxrUrl) ?>" class="btn btn-success" target="_blank" rel="noopener noreferrer">
+                                    <i class="bi bi-box-arrow-up-right"></i> Apri simulazione WebXR
                                 </a>
                             </div>
                         <?php endif; ?>

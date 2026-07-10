@@ -16,50 +16,85 @@ try {
     $provincia = $_GET['provincia'] ?? '';
     $search = $_GET['search'] ?? '';
 
-    $query = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, i.Indirizzo, 
+    // Support optional filtering and pagination
+    $stato = isset($_GET['stato']) ? $_GET['stato'] : null; // 0,1,2 or null
+    $per_page = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 100; // 0 = no limit
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+
+    $baseSelect = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, i.Indirizzo, 
                      i.Comune, i.Provincia, i.Regione, i.CF_PIVA, i.Coordinate_GPS,
                      i.Stato_Validazione
-              FROM istituti_e_partner i
-              WHERE i.Stato_Validazione = 1";
+              FROM istituti_e_partner i";
 
+    $whereClauses = ["1=1"];
     $params = [];
+
+    // Default behavior: only approved (1) for backward compatibility
+    if ($stato === null) {
+        $whereClauses[] = 'i.Stato_Validazione = 1';
+    } else {
+        $whereClauses[] = 'i.Stato_Validazione = ?';
+        $params[] = $stato;
+    }
 
     // Filtra per tipo partner
     if ($partner_type === 'partner_vr') {
         // Partner VR: Aziende e strutture specializzate in realtà virtuale
-        $query .= " AND i.Tipologia IN ('AZIENDA', 'ARENA_VR', 'ARENA_MOBILE', 'PARTNER_VR')";
+        $whereClauses[] = "i.Tipologia IN ('AZIENDA', 'ARENA_VR', 'ARENA_MOBILE', 'PARTNER_VR')";
     } elseif ($partner_type === 'partner_fsl') {
         // Partner FSL: Enti che erogano formazione con certificazione FSL
-        $query .= " AND (i.Tipologia LIKE '%AZIENDA%' OR i.Tipologia LIKE '%PARTNER%')";
+        $whereClauses[] = "(i.Tipologia LIKE '%AZIENDA%' OR i.Tipologia LIKE '%PARTNER%')";
     } elseif ($partner_type === 'istituti') {
         // Istituti scolastici
-        $query .= " AND i.Tipologia IN ('SCUOLA PRIMARIA', 'SCUOLA INFANZIA', 'SCUOLA PRIMO GRADO', 
+        $whereClauses[] = "i.Tipologia IN ('SCUOLA PRIMARIA', 'SCUOLA INFANZIA', 'SCUOLA PRIMO GRADO', 
                                          'ISTITUTO COMPRENSIVO', 'LICEO CLASSICO', 'LICEO SCIENTIFICO',
                                          'ISTITUTO TECNICO', 'ISTITUTO PROFESSIONALE', 'ISTITUTO MAGISTRALE')";
     }
 
     // Filtra per regione
     if (!empty($regione)) {
-        $query .= " AND i.Regione = ?";
+        $whereClauses[] = 'i.Regione = ?';
         $params[] = $regione;
     }
 
     // Filtra per provincia
     if (!empty($provincia)) {
-        $query .= " AND i.Provincia = ?";
+        $whereClauses[] = 'i.Provincia = ?';
         $params[] = $provincia;
     }
 
     // Filtra per ricerca nel nome
     if (!empty($search)) {
-        $query .= " AND i.Ragione_Sociale LIKE ?";
+        $whereClauses[] = '(i.Ragione_Sociale LIKE ? OR i.Indirizzo LIKE ? OR i.Comune LIKE ?)';
+        $params[] = "%{$search}%";
+        $params[] = "%{$search}%";
         $params[] = "%{$search}%";
     }
 
-    $query .= " ORDER BY i.Ragione_Sociale ASC LIMIT 100";
+    $where = ' WHERE ' . implode(' AND ', $whereClauses);
+
+    // Count totale per paginazione
+    $countQuery = "SELECT COUNT(*) as total " . $baseSelect . $where;
+    $countStmt = $pdo->prepare($countQuery);
+    $countStmt->execute($params);
+    $totalMatching = (int)$countStmt->fetchColumn();
+
+    // Costruisci query dati con paginazione
+    $query = "SELECT i.ID_Ente, i.Ragione_Sociale, i.Tipologia, i.Email, i.Indirizzo, 
+                     i.Comune, i.Provincia, i.Regione, i.CF_PIVA, i.Coordinate_GPS,
+                     i.Stato_Validazione
+              " . $baseSelect . $where . " ORDER BY i.Ragione_Sociale ASC";
+
+    $execParams = $params;
+    if ($per_page > 0) {
+        $offset = ($page - 1) * $per_page;
+        $query .= " LIMIT ?, ?";
+        $execParams[] = $offset;
+        $execParams[] = $per_page;
+    }
 
     $stmt = $pdo->prepare($query);
-    $stmt->execute($params);
+    $stmt->execute($execParams);
     $istituti = $stmt->fetchAll();
 
     // Restituisci risultati
@@ -67,6 +102,9 @@ try {
         'success' => true,
         'partner_type' => $partner_type,
         'count' => count($istituti),
+        'total_matching' => $totalMatching,
+        'page' => $page,
+        'per_page' => $per_page,
         'data' => $istituti
     ]);
 

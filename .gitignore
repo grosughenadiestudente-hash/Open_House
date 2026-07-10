@@ -1,2 +1,6 @@
 .tmp.driveupload/
 .vscode/
+*.bak
+*.bak.*
+tools/_*.php
+tools/*_tmp.php

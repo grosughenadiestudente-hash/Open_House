@@ -134,4 +134,95 @@ function sendHtmlEmail($to, $subject, $htmlBody) {
 
     return @mail($to, $subject, $htmlBody, implode("\r\n", $headers));
 }
+
+function tableHasColumn(PDO $pdo, string $tableName, string $columnName): bool {
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');
+    $stmt->execute([$tableName, $columnName]);
+    return (int) $stmt->fetchColumn() > 0;
+}
+
+function getTableColumns(PDO $pdo, string $table): array {
+    $stmt = $pdo->query('SHOW COLUMNS FROM ' . $table);
+    $columns = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $columns[] = $row['Field'];
+    }
+    return $columns;
+}
+
+function getUserTable(PDO $pdo, bool $required = true): ?string {
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+    if (in_array('utenti', $tables, true)) {
+        $cached = 'utenti';
+        return $cached;
+    }
+    if (in_array('utenti_finali', $tables, true)) {
+        $cached = 'utenti_finali';
+        return $cached;
+    }
+    if ($required) {
+        throw new RuntimeException('Nessuna tabella utenti disponibile (utenti / utenti_finali).');
+    }
+    return null;
+}
+
+function insertIstitutoPartner(PDO $pdo, array $data): void {
+    $available = getTableColumns($pdo, 'istituti_e_partner');
+    $map = [
+        'Ragione_Sociale' => $data['Ragione_Sociale'] ?? null,
+        'Tipologia' => $data['Tipologia'] ?? null,
+        'CF_PIVA' => $data['CF_PIVA'] ?? null,
+        'Cod_Mecc' => $data['Cod_Mecc'] ?? null,
+        'Cod_REA' => $data['Cod_REA'] ?? null,
+        'Indirizzo' => $data['Indirizzo'] ?? null,
+        'Comune' => $data['Comune'] ?? null,
+        'Provincia' => $data['Provincia'] ?? null,
+        'Regione' => $data['Regione'] ?? null,
+        'Coordinate_GPS' => $data['Coordinate_GPS'] ?? null,
+        'Email' => $data['Email'] ?? null,
+        'Telefono' => $data['Telefono'] ?? null,
+        'descrizione' => $data['descrizione'] ?? null,
+        'password' => $data['password'] ?? null,
+        'Stato_Validazione' => 0,
+    ];
+
+    $fields = [];
+    $values = [];
+    $params = [];
+    foreach ($map as $field => $value) {
+        if (in_array($field, $available, true)) {
+            $fields[] = $field;
+            $values[] = '?';
+            $params[] = $value;
+        }
+    }
+
+    if (empty($fields)) {
+        throw new RuntimeException('Tabella istituti_e_partner non compatibile con la registrazione.');
+    }
+
+    $sql = 'INSERT INTO istituti_e_partner (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $values) . ')';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+}
+
+/** Normalizza riga attivita_eventi per i form legacy (chiavi minuscole). */
+function normalizeAttivitaRow(array $row): array {
+    return [
+        'titolo' => $row['Titolo'] ?? $row['titolo'] ?? '',
+        'descrizione' => $row['Descrizione'] ?? $row['descrizione'] ?? '',
+        'tipo_attivita' => $row['Tipo_Attivita'] ?? $row['tipo_attivita'] ?? 'presentazione',
+        'data_ora' => $row['Data_Ora'] ?? $row['data_ora'] ?? '',
+        'durata_minuti' => $row['Durata_Minuti'] ?? $row['durata_minuti'] ?? 60,
+        'max_partecipanti' => $row['Max_Posti'] ?? $row['max_partecipanti'] ?? 50,
+        'supporta_vr' => $row['Supporta_VR'] ?? $row['supporta_vr'] ?? 0,
+        'url_vr' => $row['Link_WebXR'] ?? $row['url_vr'] ?? '',
+        'materiali_url' => $row['Materiali_URL'] ?? $row['materiali_url'] ?? '',
+        'stato' => $row['Stato'] ?? $row['stato'] ?? 'bozza',
+    ];
+}
 ?>

@@ -8,17 +8,16 @@ $partnerId = isset($_GET['partner_id']) ? (int)$_GET['partner_id'] : 0;
 
 try {
     if ($partnerId === 0) {
-        // Trova un partner validato (azienda/partner) preferibilmente FSL/FSR
-        $stmt = $pdo->prepare("SELECT ID_Ente FROM istituti_e_partner WHERE Stato_Validazione = 1 AND (Tipologia LIKE '%AZIENDA%' OR Tipologia LIKE '%PARTNER%' OR Tipologia LIKE '%FSL%' OR Tipologia LIKE '%FSR%' OR Tipologia LIKE '%AZIENDA%') LIMIT 1");
-        $stmt->execute();
+        $stmt = $pdo->prepare("SELECT ID_Ente FROM istituti_e_partner WHERE Ragione_Sociale = ? AND Stato_Validazione = 1 LIMIT 1");
+        $stmt->execute(['Prova Robototecnica']);
         $p = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$p) {
-            echo "❌ Nessun partner validato (FSL/FSR/azienda) trovato. Esegui prima la validazione o inserisci un partner.<br>";
-            echo "<a href=\"check_partners_selectable.php\">Verifica partner</a>";
+            echo "❌ Partner 'Prova Robototecnica' non trovato. Passa ?partner_id=ID_Ente nell'URL.<br>";
+            echo "<a href=\"debug_partner.php\">Debug partner</a>";
             exit;
         }
-        $partnerId = (int)$p['ID_Ente'];
-        echo "Selezionato partner ID: $partnerId<br>";
+        $partnerId = (int) $p['ID_Ente'];
+        echo "Partner Prova Robototecnica ID: {$partnerId}<br>";
     } else {
         echo "Partner selezionato ID: $partnerId<br>";
     }

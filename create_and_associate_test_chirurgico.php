@@ -8,15 +8,23 @@ $partnerEmail = 'info@fslmedpark.it';
 $attivitaTitolo = 'test chirurgico';
 
 try {
+    $hasTelefono = tableHasColumn($pdo, 'istituti_e_partner', 'Telefono');
+
     // Controlla se esiste già il partner
     $stmt = $pdo->prepare("SELECT ID_Ente FROM istituti_e_partner WHERE Ragione_Sociale = ? LIMIT 1");
     $stmt->execute([$partnerName]);
     $partner = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$partner) {
-        $stmt = $pdo->prepare("INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Stato_Validazione)
+        if ($hasTelefono) {
+            $stmt = $pdo->prepare("INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Telefono, Stato_Validazione)
+                               VALUES (?, 'AZIENDA', ?, 'Via Medpark 1', 'Milano', 'MI', 'LOMBARDIA', NULL, 1)");
+            $stmt->execute([$partnerName, $partnerEmail]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Stato_Validazione)
                                VALUES (?, 'AZIENDA', ?, 'Via Medpark 1', 'Milano', 'MI', 'LOMBARDIA', 1)");
-        $stmt->execute([$partnerName, $partnerEmail]);
+            $stmt->execute([$partnerName, $partnerEmail]);
+        }
         $partnerId = (int)$pdo->lastInsertId();
         echo "✓ Partner creato: {$partnerName} (ID: {$partnerId})<br>\n";
     } else {

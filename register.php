@@ -6,66 +6,6 @@ $success = '';
 $showSuccessPopup = false;
 $lang = $_GET['lang'] ?? 'it';
 
-function getTableColumns(PDO $pdo, string $table): array {
-    $stmt = $pdo->query("SHOW COLUMNS FROM {$table}");
-    $columns = [];
-    foreach ($stmt->fetchAll() as $row) {
-        $columns[] = $row['Field'];
-    }
-    return $columns;
-}
-
-function getUserTable(PDO $pdo): string {
-    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    if (in_array('utenti', $tables, true)) {
-        return 'utenti';
-    }
-    if (in_array('utenti_finali', $tables, true)) {
-        return 'utenti_finali';
-    }
-    throw new RuntimeException('Nessuna tabella utenti disponibile (utenti / utenti_finali).');
-}
-
-function insertIstitutoPartner(PDO $pdo, array $data): void {
-    $available = getTableColumns($pdo, 'istituti_e_partner');
-    $map = [
-        'Ragione_Sociale' => $data['Ragione_Sociale'] ?? null,
-        'Tipologia' => $data['Tipologia'] ?? null,
-        'CF_PIVA' => $data['CF_PIVA'] ?? null,
-        'Cod_Mecc' => $data['Cod_Mecc'] ?? null,
-        'Cod_REA' => $data['Cod_REA'] ?? null,
-        'Indirizzo' => $data['Indirizzo'] ?? null,
-        'Comune' => $data['Comune'] ?? null,
-        'Provincia' => $data['Provincia'] ?? null,
-        'Regione' => $data['Regione'] ?? null,
-        'Coordinate_GPS' => $data['Coordinate_GPS'] ?? null,
-        'Email' => $data['Email'] ?? null,
-        'Telefono' => $data['Telefono'] ?? null,
-        'descrizione' => $data['descrizione'] ?? null,
-        'password' => $data['password'] ?? null,
-        'Stato_Validazione' => 0,
-    ];
-
-    $fields = [];
-    $values = [];
-    $params = [];
-    foreach ($map as $field => $value) {
-        if (in_array($field, $available, true)) {
-            $fields[] = $field;
-            $values[] = '?';
-            $params[] = $value;
-        }
-    }
-
-    if (empty($fields)) {
-        throw new RuntimeException('Tabella istituti_e_partner non compatibile con la registrazione.');
-    }
-
-    $sql = 'INSERT INTO istituti_e_partner (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $values) . ')';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_type = $_POST['user_type'] ?? '';
     $email = sanitize($_POST['email'] ?? '');

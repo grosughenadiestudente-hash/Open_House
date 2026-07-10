@@ -23,13 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Compila tutti i campi obbligatori';
     } else {
         try {
-            $stmt = $pdo->prepare("INSERT INTO attivita 
-                (istituto_id, titolo, descrizione, tipo_attivita, data_ora, durata_minuti, 
-                 max_partecipanti, supporta_vr, url_vr, materiali_url, stato) 
+            $stmt = $pdo->prepare("INSERT INTO attivita_eventi
+                (FK_Ente_Organizzatore, Titolo, Descrizione, Tipo_Attivita, Data_Ora, Durata_Minuti,
+                 Max_Posti, Supporta_VR, Link_WebXR, Materiali_URL, Stato)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $istituto_id, $titolo, $descrizione, $tipo_attivita, $data_ora, 
-                $durata_minuti, $max_partecipanti, $supporta_vr, $url_vr, $materiali_url, $stato
+                $istituto_id, $titolo, $descrizione, $tipo_attivita, $data_ora,
+                $durata_minuti, $max_partecipanti, $supporta_vr, $url_vr ?: null, $materiali_url ?: null, $stato
             ]);
             $success = 'Attività creata con successo!';
             header('Location: attivita_gestione.php?lang=' . $lang);

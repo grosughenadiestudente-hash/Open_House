@@ -27,6 +27,8 @@ $tot_prenotazioni = $stmt->fetch()['totale'] ?? 0;
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
+    <?php include 'navbar.php'; ?>
+
 <div class="container py-4">
     <h2 class="mb-3"><i class="bi bi-broadcast-pin"></i> Dashboard Partner</h2>
     <div class="row g-3 mb-4">
@@ -69,5 +71,6 @@ $tot_prenotazioni = $stmt->fetch()['totale'] ?? 0;
         <a href="logout.php" class="btn btn-outline-secondary">Logout</a>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

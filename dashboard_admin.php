@@ -2,6 +2,8 @@
 require_once 'config.php';
 requireAdmin();
 
+$lang = $_GET['lang'] ?? 'it';
+
 $stmt = $pdo->query("SELECT COUNT(*) AS totale FROM istituti_e_partner WHERE Stato_Validazione = 0");
 $istituti_in_attesa = $stmt->fetch()['totale'] ?? 0;
 
@@ -12,7 +14,7 @@ $stmt = $pdo->query("SELECT COUNT(*) AS totale FROM prenotazioni");
 $tot_prenotazioni = $stmt->fetch()['totale'] ?? 0;
 ?>
 <!DOCTYPE html>
-<html lang="it">
+<html lang="<?= $lang ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +24,8 @@ $tot_prenotazioni = $stmt->fetch()['totale'] ?? 0;
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
+    <?php include 'navbar.php'; ?>
+
 <div class="container py-4">
     <h2 class="mb-3"><i class="bi bi-shield-check"></i> Dashboard Amministratore</h2>
     <div class="row g-3">
@@ -58,5 +62,6 @@ $tot_prenotazioni = $stmt->fetch()['totale'] ?? 0;
         <a href="logout.php" class="btn btn-outline-secondary">Logout</a>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

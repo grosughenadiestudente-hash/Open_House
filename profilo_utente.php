@@ -7,17 +7,6 @@ $utente_id = $_SESSION['user_id'];
 $error = '';
 $success = '';
 
-function getUserTable(PDO $pdo): string {
-    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    if (in_array('utenti', $tables, true)) {
-        return 'utenti';
-    }
-    if (in_array('utenti_finali', $tables, true)) {
-        return 'utenti_finali';
-    }
-    throw new RuntimeException('Nessuna tabella utenti disponibile (utenti / utenti_finali).');
-}
-
 // Carica dati utente
 try {
     $userTable = getUserTable($pdo);

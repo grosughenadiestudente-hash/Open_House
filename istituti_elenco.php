@@ -171,7 +171,7 @@ $tipologie_ente_map = [
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
-    <?php if (isLoggedIn()): include 'navbar.php'; else: $active_page = 'istituti'; include 'header.php'; endif; ?>
+    <?php include 'navbar.php'; ?>
 
     <div class="container mt-4 mb-5">
         <h2 class="mb-4"><?= $t['cerca_istituti'] ?></h2>

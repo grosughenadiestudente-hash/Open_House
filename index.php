@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once 'config.php';
 
 $lang = $_GET['lang'] ?? 'it';
@@ -6,10 +6,13 @@ $lang = $_GET['lang'] ?? 'it';
 // Gestione errori database
 $attivita_featured = [];
 $total_istituti = 0;
+$total_partner = 0;
+$total_enti = 0;
 $total_attivita = 0;
+$total_utenti_registrati = 0;
 
 try {
-    // Ottieni attività pubblicate recenti
+    // Tutte le attivita pubblicate (passate e future)
     $stmt = $pdo->prepare("SELECT a.ID_Attivita as id, a.Titolo as titolo, a.Descrizione as descrizione, 
                            a.Data_Ora as data_ora, a.Supporta_VR as supporta_vr, a.Max_Posti as max_partecipanti,
                            i.Ragione_Sociale as istituto_nome, i.Tipologia as tipo_scuola,
@@ -17,23 +20,39 @@ try {
                            FROM attivita_eventi a 
                            JOIN istituti_e_partner i ON a.FK_Ente_Organizzatore = i.ID_Ente 
                            LEFT JOIN prenotazioni p ON a.ID_Attivita = p.attivita_id AND p.stato = 'confermata'
-                           WHERE a.Stato = 'pubblicata' 
-                           AND a.Data_Ora > NOW()
+                           WHERE a.Stato = 'pubblicata'
                            GROUP BY a.ID_Attivita 
-                           ORDER BY a.Data_Ora ASC 
-                           LIMIT 6");
+                           ORDER BY a.Data_Ora ASC");
     $stmt->execute();
     $attivita_featured = $stmt->fetchAll();
 
-    // Conta statistiche
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM istituti_e_partner");
-    $total_istituti = $stmt->fetch()['total'] ?? 0;
+    // Conta statistiche separando istituti e partner in base ai codici dedicati
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM istituti_e_partner WHERE Cod_Mecc IS NOT NULL AND Cod_Mecc != ''");
+    $total_istituti = (int)($stmt->fetch()['total'] ?? 0);
+
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM istituti_e_partner WHERE Cod_REA IS NOT NULL AND Cod_REA != ''");
+    $total_partner = (int)($stmt->fetch()['total'] ?? 0);
+
+    $total_enti = $total_istituti + $total_partner;
 
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM attivita_eventi WHERE Stato = 'pubblicata'");
     $total_attivita = $stmt->fetch()['total'] ?? 0;
+
+    $userTable = null;
+    $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+    if (in_array('utenti', $tables, true)) {
+        $userTable = 'utenti';
+    } elseif (in_array('utenti_finali', $tables, true)) {
+        $userTable = 'utenti_finali';
+    }
+
+    if ($userTable !== null) {
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM {$userTable}");
+        $total_utenti_registrati = (int)($stmt->fetch()['total'] ?? 0);
+    }
 } catch(PDOException $e) {
-    // Se il database non è ancora configurato, mostra valori di default
-    // L'utente vedrà la pagina ma senza dati
+    // Se il database non e ancora configurato, mostra valori di default
+    // L'utente vedra la pagina ma senza dati
     if (defined('DEBUG_MODE') && DEBUG_MODE) {
         error_log("Database error in index.php: " . $e->getMessage());
     }
@@ -44,11 +63,12 @@ $translations = [
         'title' => 'VR Open House - Orientamento Immersivo',
         'hero_title' => 'VR Open House',
         'hero_subtitle' => 'Un mondo nuovo per avvicinare studenti, famiglie, scuola e lavoro',
-        'scopri' => 'Scopri le Attività',
+        'scopri' => 'Scopri le Attivita',
         'registrati' => 'Registrati',
         'accedi' => 'Accedi',
         'istituti' => 'Istituti',
-        'attivita' => 'Attività',
+        'utenti_registrati' => 'Utenti registrati',
+        'attivita' => 'Attivita',
         'partecipanti' => 'Partecipanti',
         'prenota' => 'Prenota',
         'dettagli' => 'Dettagli',
@@ -58,8 +78,8 @@ $translations = [
         'per_utenti' => 'Per Utenti',
         'per_partner' => 'Per Partner VR e FSL',
         'desc_per_istituti' => 'Dashboard per pubblicare laboratori, tour e moduli orientativi con contenuti 360/WebXR',
-        'desc_per_utenti' => 'Ricerca attività, prenotazione multimodale (casa o arena) e storico personale',
-        'desc_per_partner' => 'Visibilità territoriale, supporto tecnico in Arena VR e mentorato nelle esperienze immersive',
+        'desc_per_utenti' => 'Ricerca attivita, prenotazione multimodale (casa o arena) e storico personale',
+        'desc_per_partner' => 'Visibilita territoriale, supporto tecnico in Arena VR e mentorato nelle esperienze immersive',
         'inizia_ora' => 'Inizia Ora',
         'ecosistema' => 'Ecosistema VR Open House',
         'ecosistema_subtitle' => 'Un modello collaborativo tra scuole, famiglie, partner territoriali e mondo del lavoro',
@@ -79,7 +99,9 @@ $translations = [
         'corsi_certificazioni' => 'Corsi e Certificazioni',
         'storico_fsl' => 'Storico personale e materiali FSL',
         'cta_join' => 'Unisciti alla piattaforma',
-        'footer' => '© 2025 Open House. Tutti i diritti riservati.'
+        'footer' => '� 2025 Open House. Tutti i diritti riservati.',
+        'utenti_finali' => 'Utenti Finali',
+        'partner' => 'Partner'
     ],
     'en' => [
         'title' => 'VR Open House - Immersive Orientation',
@@ -89,6 +111,7 @@ $translations = [
         'registrati' => 'Register',
         'accedi' => 'Login',
         'istituti' => 'Institutions',
+        'utenti_registrati' => 'Registered users',
         'attivita' => 'Activities',
         'partecipanti' => 'Participants',
         'prenota' => 'Book',
@@ -120,7 +143,9 @@ $translations = [
         'corsi_certificazioni' => 'Courses and Certifications',
         'storico_fsl' => 'Personal history and FSL materials',
         'cta_join' => 'Join the platform',
-        'footer' => '© 2025 Open House. All rights reserved.'
+        'footer' => '� 2025 Open House. All rights reserved.',
+        'utenti_finali' => 'End Users',
+        'partner' => 'Partners'
     ]
 ];
 
@@ -138,21 +163,20 @@ $t = $translations[$lang];
 </head>
 <body>
     <?php $active_page = 'home'; include 'header.php'; ?>
-
-    <!-- Hero Section -->
-    <section class="bg-primary text-white py-5">
+<!-- Hero Section -->
+    <section class="bg-primary text-white py-4">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4"><?= $t['hero_title'] ?></h1>
-                    <p class="lead mb-4"><?= $t['hero_subtitle'] ?></p>
+                    <h1 class="display-5 fw-bold mb-3 hero-title-fluo"><?= $t['hero_title'] ?></h1>
+                    <p class="lead mb-3 hero-subtitle-fluo"><?= $t['hero_subtitle'] ?></p>
                     <div class="d-flex gap-3">
                         <a href="register.php?lang=<?= $lang ?>" class="btn btn-light btn-lg"><?= $t['registrati'] ?></a>
                         <a href="attivita_elenco.php?lang=<?= $lang ?>" class="btn btn-outline-light btn-lg"><?= $t['scopri'] ?></a>
                     </div>
                 </div>
                 <div class="col-lg-6 text-center">
-                    <i class="bi bi-vr" style="font-size: 15rem; opacity: 0.3;"></i>
+                    <i class="bi bi-vr" style="font-size: 10rem; opacity: 0.3;"></i>
                 </div>
             </div>
         </div>
@@ -167,12 +191,16 @@ $t = $translations[$lang];
                     <p class="lead"><?= $t['istituti'] ?></p>
                 </div>
                 <div class="col-md-3">
+                    <h2 class="display-4 text-warning"><?= $total_partner ?></h2>
+                    <p class="lead"><?= $t['partner'] ?></p>
+                </div>
+                <div class="col-md-3">
                     <h2 class="display-4 text-success"><?= $total_attivita ?></h2>
                     <p class="lead"><?= $t['attivita'] ?></p>
                 </div>
                 <div class="col-md-3">
-                    <h2 class="display-4 text-info"><i class="bi bi-vr"></i></h2>
-                    <p class="lead"><?= $t['vr'] ?></p>
+                    <h2 class="display-4 text-info"><?= $total_utenti_registrati ?></h2>
+                    <p class="lead"><?= $t['utenti_registrati'] ?></p>
                 </div>
                 <div class="col-md-3">
                     <h2 class="display-4 text-warning"><i class="bi bi-clock-history"></i></h2>
@@ -332,5 +360,6 @@ $t = $translations[$lang];
     </script>
 </body>
 </html>
+
 
 

@@ -4,6 +4,8 @@ require_once 'config.php';
 echo "<h2>Inserimento Partner Demo</h2>";
 
 try {
+    $hasTelefono = tableHasColumn($pdo, 'istituti_e_partner', 'Telefono');
+
     // Prima controlla se ci sono già partner
     $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM istituti_e_partner WHERE Ragione_Sociale LIKE 'Prova%' OR Ragione_Sociale LIKE '%VR'");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -16,25 +18,46 @@ try {
     }
     
     // Inserisci Partner FSL (con Cod_REA)
-    $pdo->exec("
-        INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Cod_REA, Telefono, Stato_Validazione) VALUES
-        ('Prova Robototecnica', 'AZIENDA', 'info@prova-robotica.it', 'Via Roma 10', 'Palermo', 'PA', 'SICILIA', 'PA123456', '091234567', 1),
-        ('Prova Medicina', 'AZIENDA', 'info@prova-medicina.it', 'Via Garibaldi 25', 'Catania', 'CT', 'SICILIA', 'CT654321', '095234567', 1),
-        ('Prova Ingegneria Meccanica', 'AZIENDA', 'info@prova-ing.it', 'Via Mazzini 15', 'Messina', 'ME', 'SICILIA', 'ME789456', '090234567', 1),
-        ('Prova Scienze Biologiche', 'AZIENDA', 'info@prova-bio.it', 'Corso Vittorio 30', 'Agrigento', 'AG', 'SICILIA', 'AG456789', '092234567', 1),
-        ('Prova Architettura Sostenibile', 'AZIENDA', 'info@prova-arch.it', 'Viale Autonomia 12', 'Trapani', 'TP', 'SICILIA', 'TP321654', '092342567', 1)
-    ");
+    if ($hasTelefono) {
+        $pdo->exec("
+            INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Cod_REA, Telefono, Stato_Validazione) VALUES
+            ('Prova Robototecnica', 'AZIENDA', 'info@prova-robotica.it', 'Via Roma 10', 'Palermo', 'PA', 'SICILIA', 'PA123456', NULL, 1),
+            ('Prova Medicina', 'AZIENDA', 'info@prova-medicina.it', 'Via Garibaldi 25', 'Catania', 'CT', 'SICILIA', 'CT654321', NULL, 1),
+            ('Prova Ingegneria Meccanica', 'AZIENDA', 'info@prova-ing.it', 'Via Mazzini 15', 'Messina', 'ME', 'SICILIA', 'ME789456', NULL, 1),
+            ('Prova Scienze Biologiche', 'AZIENDA', 'info@prova-bio.it', 'Corso Vittorio 30', 'Agrigento', 'AG', 'SICILIA', 'AG456789', NULL, 1),
+            ('Prova Architettura Sostenibile', 'AZIENDA', 'info@prova-arch.it', 'Viale Autonomia 12', 'Trapani', 'TP', 'SICILIA', 'TP321654', NULL, 1)
+        ");
+    } else {
+        $pdo->exec("
+            INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Cod_REA, Stato_Validazione) VALUES
+            ('Prova Robototecnica', 'AZIENDA', 'info@prova-robotica.it', 'Via Roma 10', 'Palermo', 'PA', 'SICILIA', 'PA123456', 1),
+            ('Prova Medicina', 'AZIENDA', 'info@prova-medicina.it', 'Via Garibaldi 25', 'Catania', 'CT', 'SICILIA', 'CT654321', 1),
+            ('Prova Ingegneria Meccanica', 'AZIENDA', 'info@prova-ing.it', 'Via Mazzini 15', 'Messina', 'ME', 'SICILIA', 'ME789456', 1),
+            ('Prova Scienze Biologiche', 'AZIENDA', 'info@prova-bio.it', 'Corso Vittorio 30', 'Agrigento', 'AG', 'SICILIA', 'AG456789', 1),
+            ('Prova Architettura Sostenibile', 'AZIENDA', 'info@prova-arch.it', 'Viale Autonomia 12', 'Trapani', 'TP', 'SICILIA', 'TP321654', 1)
+        ");
+    }
     
     echo "✓ Inseriti 5 Partner FSL<br>";
     
     // Inserisci Partner VR (con Tipologia ARENA_VR o PARTNER_VR)
-    $pdo->exec("
-        INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Telefono, Stato_Validazione) VALUES
-        ('TechVision VR', 'ARENA_VR', 'info@techvision-vr.it', 'Via Innovazione 5', 'Palermo', 'PA', 'SICILIA', '091111111', 1),
-        ('ImmersiveSpace VR', 'PARTNER_VR', 'contact@immersivespace.it', 'Via Tecnologia 20', 'Catania', 'CT', 'SICILIA', '095111111', 1),
-        ('VirtualWorld Arena', 'ARENA_VR', 'hello@virtualworld.it', 'Via Realtà Virtuale 8', 'Messina', 'ME', 'SICILIA', '090111111', 1),
-        ('XR Solutions VR', 'PARTNER_VR', 'info@xr-solutions.it', 'Corso Digitale 42', 'Agrigento', 'AG', 'SICILIA', '092111111', 1)
-    ");
+    if ($hasTelefono) {
+        $pdo->exec("
+            INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Telefono, Stato_Validazione) VALUES
+            ('TechVision VR', 'ARENA_VR', 'info@techvision-vr.it', 'Via Innovazione 5', 'Palermo', 'PA', 'SICILIA', NULL, 1),
+            ('ImmersiveSpace VR', 'PARTNER_VR', 'contact@immersivespace.it', 'Via Tecnologia 20', 'Catania', 'CT', 'SICILIA', NULL, 1),
+            ('VirtualWorld Arena', 'ARENA_VR', 'hello@virtualworld.it', 'Via Realtà Virtuale 8', 'Messina', 'ME', 'SICILIA', NULL, 1),
+            ('XR Solutions VR', 'PARTNER_VR', 'info@xr-solutions.it', 'Corso Digitale 42', 'Agrigento', 'AG', 'SICILIA', NULL, 1)
+        ");
+    } else {
+        $pdo->exec("
+            INSERT INTO istituti_e_partner (Ragione_Sociale, Tipologia, Email, Indirizzo, Comune, Provincia, Regione, Stato_Validazione) VALUES
+            ('TechVision VR', 'ARENA_VR', 'info@techvision-vr.it', 'Via Innovazione 5', 'Palermo', 'PA', 'SICILIA', 1),
+            ('ImmersiveSpace VR', 'PARTNER_VR', 'contact@immersivespace.it', 'Via Tecnologia 20', 'Catania', 'CT', 'SICILIA', 1),
+            ('VirtualWorld Arena', 'ARENA_VR', 'hello@virtualworld.it', 'Via Realtà Virtuale 8', 'Messina', 'ME', 'SICILIA', 1),
+            ('XR Solutions VR', 'PARTNER_VR', 'info@xr-solutions.it', 'Corso Digitale 42', 'Agrigento', 'AG', 'SICILIA', 1)
+        ");
+    }
     
     echo "✓ Inseriti 4 Partner VR<br>";
     echo "<br><strong>✓ Totale: 9 partner inseriti con successo!</strong><br>";
