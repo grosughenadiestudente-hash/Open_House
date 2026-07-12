@@ -84,13 +84,17 @@ RENAME TABLE `attivita` TO `attivita_backup_old`;
 -- ============================================================================
 -- STEP 8: Demo tecnica WebXR per ITIS "PIETRO PALEOCAPA" Bergamo
 -- ============================================================================
+UPDATE `attivita_eventi`
+SET `Titolo` = 'Insect Robo'
+WHERE `Titolo` = 'Simulazione WebXR - Braccio robotico 3D';
+
 INSERT INTO `attivita_eventi`
   (`FK_Ente_Organizzatore`, `Titolo`, `Descrizione`, `Link_WebXR`, `Data_Ora`,
    `Max_Posti`, `Flag_FSL`, `Tipo_Attivita`, `Durata_Minuti`, `Supporta_VR`, `Materiali_URL`, `Stato`)
 SELECT
   i.`ID_Ente`,
-  'Simulazione WebXR - Braccio robotico 3D',
-  'Laboratorio di robototecnica con simulazione tecnica WebXR del braccio robotico in 3D, pensato per utenti registrati del portale e per l\'orientamento tecnologico.',
+  'Insect Robo',
+  'Laboratorio di robototecnica con simulazione WebXR di Insect Robo, un braccio robotico 3D ispirato agli insetti, pensato per utenti registrati del portale e per l\'orientamento tecnologico.',
   'https://Novia-RDI-XR-Robotics.github.io/a-frame-xr-tutorial/',
   '2026-05-15 10:00:00',
   30,
@@ -106,5 +110,5 @@ WHERE i.`Cod_Mecc` = 'BGTF010003'
     SELECT 1
     FROM `attivita_eventi` a
     WHERE a.`FK_Ente_Organizzatore` = i.`ID_Ente`
-      AND a.`Titolo` = 'Simulazione WebXR - Braccio robotico 3D'
+      AND a.`Titolo` = 'Insect Robo'
   );

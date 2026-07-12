@@ -5,8 +5,9 @@ header('Content-Type: text/html; charset=utf-8');
 
 try {
     $codMecc = 'BGTF010003';
-    $titolo = 'Simulazione WebXR - Braccio robotico 3D';
-    $descrizione = 'Laboratorio di robototecnica con simulazione tecnica WebXR del braccio robotico in 3D, pensato per utenti registrati del portale e per l\'orientamento tecnologico.';
+    $titoloVecchio = 'Simulazione WebXR - Braccio robotico 3D';
+    $titolo = 'Insect Robo';
+    $descrizione = 'Laboratorio di robototecnica con simulazione WebXR di Insect Robo, un braccio robotico 3D ispirato agli insetti, pensato per utenti registrati del portale e per l\'orientamento tecnologico.';
     $linkWebxr = 'https://sketchfab.com/3d-models/insect-mecha-a49db794b7a242feb85fa4ba427fa3bb';
     $dataOra = '2026-05-15 10:00:00';
 
@@ -34,13 +35,14 @@ try {
         $enteId = (int)$ente['ID_Ente'];
     }
 
-    $stmt = $pdo->prepare("SELECT ID_Attivita FROM attivita_eventi WHERE FK_Ente_Organizzatore = ? AND Titolo = ? LIMIT 1");
-    $stmt->execute([$enteId, $titolo]);
+    $stmt = $pdo->prepare("SELECT ID_Attivita, Titolo FROM attivita_eventi WHERE FK_Ente_Organizzatore = ? AND Titolo IN (?, ?) LIMIT 1");
+    $stmt->execute([$enteId, $titoloVecchio, $titolo]);
     $esistente = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($esistente) {
-        $stmt = $pdo->prepare("UPDATE attivita_eventi SET Descrizione = ?, Link_WebXR = ?, Data_Ora = ?, Max_Posti = ?, Flag_FSL = ?, Tipo_Attivita = ?, Durata_Minuti = ?, Supporta_VR = ?, Materiali_URL = ?, Stato = ? WHERE ID_Attivita = ?");
+        $stmt = $pdo->prepare("UPDATE attivita_eventi SET Titolo = ?, Descrizione = ?, Link_WebXR = ?, Data_Ora = ?, Max_Posti = ?, Flag_FSL = ?, Tipo_Attivita = ?, Durata_Minuti = ?, Supporta_VR = ?, Materiali_URL = ?, Stato = ? WHERE ID_Attivita = ?");
         $stmt->execute([
+            $titolo,
             $descrizione,
             $linkWebxr,
             $dataOra,

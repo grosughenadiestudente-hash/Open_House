@@ -6,7 +6,6 @@
 
 require_once 'config.php';
 
-$page_title = "Partner VR e FSL";
 $lang = $_GET['lang'] ?? 'it';
 
 // Determina il tipo di visualizzazione
@@ -26,6 +25,16 @@ if (!in_array($view_type, $allowed_views, true)) {
 $istituti = [];
 if ($view_type === '') {
     $view_type = 'tutti';
+}
+
+if ($view_type === 'partner_vr') {
+    $page_title = $lang === 'it' ? 'Partner VR' : 'VR Partners';
+} elseif ($view_type === 'partner_fsl') {
+    $page_title = $lang === 'it' ? 'Partner FSL' : 'FSL Partners';
+} elseif ($view_type === 'istituti') {
+    $page_title = $lang === 'it' ? 'Istituti' : 'Institutions';
+} else {
+    $page_title = $lang === 'it' ? 'Partner VR e FSL' : 'VR and FSL Partners';
 }
 
 // default: show all (including non-validati) but indicate validation status

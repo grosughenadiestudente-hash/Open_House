@@ -2,6 +2,7 @@
 require_once 'config.php';
 
 $lang = $_GET['lang'] ?? 'it';
+$solo = $_GET['solo'] ?? '';
 
 // Mapping tipologie tra codici filtro e valori database
 $tipologie_map = [
@@ -58,6 +59,10 @@ if (!empty($provincia)) {
 if (!empty($tipologia_db)) {
     $query .= " AND i.Tipologia = ?";
     $params[] = $tipologia_db;
+}
+
+if ($solo === 'istituti') {
+    $query .= " AND i.Cod_Mecc IS NOT NULL AND i.Cod_Mecc != ''";
 }
 
 if (!empty($search)) {
@@ -126,6 +131,10 @@ $translations = [
 
 $t = $translations[$lang];
 
+$page_title = $solo === 'istituti'
+    ? ($lang === 'it' ? 'Istituti' : 'Institutions')
+    : $t['title'];
+
 // Mappa tipologia ente (retrocompatibile con il campo storico tipo_scuola)
 $tipologie_ente_map = [
     'it' => [
@@ -165,7 +174,7 @@ $tipologie_ente_map = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $t['title'] ?></title>
+    <title><?= htmlspecialchars($page_title) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
@@ -181,6 +190,9 @@ $tipologie_ente_map = [
             <div class="card-body">
                 <form method="GET" class="row g-3">
                     <input type="hidden" name="lang" value="<?= $lang ?>">
+                    <?php if ($solo === 'istituti'): ?>
+                        <input type="hidden" name="solo" value="istituti">
+                    <?php endif; ?>
                     
                     <div class="col-md-12">
                         <label for="search" class="form-label"><?= $t['ricerca'] ?></label>
@@ -229,7 +241,7 @@ $tipologie_ente_map = [
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-search"></i> <?= $t['cerca'] ?>
                         </button>
-                        <a href="istituti_elenco.php?lang=<?= $lang ?>" class="btn btn-secondary">
+                        <a href="istituti_elenco.php?lang=<?= $lang ?><?= $solo === 'istituti' ? '&solo=istituti' : '' ?>" class="btn btn-secondary">
                             <i class="bi bi-arrow-counterclockwise"></i> <?= $t['reset'] ?>
                         </a>
                     </div>

@@ -7,8 +7,7 @@ require_once __DIR__ . '/../config.php';
 
 $scripts = [
     'ripristina_braccio_robotico.php',
-    'create_and_associate_test_chirurgico.php',
-    'insert_prova_aeronautica.php',
+    'create_and_associate_test_3d.php',
     'tools/insert_fab_activity.php',
     'tools/insert_chimica_activity.php',
 ];

@@ -1,15 +1,18 @@
 <?php
 require_once 'config.php';
 
-echo "<h2>Crea attività 'test 3d'</h2>\n";
+echo "<h2>Crea attività 'Test 3D'</h2>\n";
 
 $partnerName = 'Demo 3D';
 $partnerEmail = 'demo3d@openhouse.local';
-$attivitaTitolo = 'test 3d';
+$attivitaTitolo = 'Test 3D';
 $viewerUrl = 'simulazione_test_3d.html';
 $modelUrl = 'mdeli%203d/AttenuationTest.glb';
 
 try {
+    $stmt = $pdo->prepare("DELETE FROM attivita_eventi WHERE Titolo = ?");
+    $stmt->execute(['Simulatore di Volo']);
+
     $stmt = $pdo->prepare("SELECT ID_Ente FROM istituti_e_partner WHERE Stato_Validazione = 1 AND (Tipologia LIKE '%AZIENDA%' OR Tipologia LIKE '%PARTNER%' OR Tipologia LIKE '%FSL%' OR Tipologia LIKE '%FSR%') ORDER BY ID_Ente ASC LIMIT 1");
     $stmt->execute();
     $partner = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,7 +43,7 @@ try {
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $dataOra = date('Y-m-d H:i:s', strtotime('+3 days'));
-    $descrizione = 'Attività dimostrativa 3D con il modello AttenuationTest.glb inserito nel repository Open House.';
+    $descrizione = 'Attività dimostrativa 3D con il modello AttenuationTest.glb, pensata per la simulazione e l\'orientamento digitale.';
 
     if (!$existing) {
         $stmt = $pdo->prepare("INSERT INTO attivita_eventi (FK_Ente_Organizzatore, Titolo, Descrizione, Link_WebXR, Data_Ora, Max_Posti, Flag_FSL, Tipo_Attivita, Durata_Minuti, Supporta_VR, Materiali_URL, Stato)
@@ -82,7 +85,7 @@ try {
 
     echo "<p><strong>Modello:</strong> {$modelUrl}</p>\n";
     echo "<p><strong>Viewer:</strong> {$viewerUrl}</p>\n";
-    echo "<p><a href=\"attivita_dettaglio.php?id={$attivitaId}&lang=it\">Apri attività test 3d</a></p>\n";
+    echo "<p><a href=\"attivita_dettaglio.php?id={$attivitaId}&lang=it\">Apri attività Test 3D</a></p>\n";
     echo "<p><a href=\"attivita_elenco.php?lang=it\">Vai a elenco attività</a></p>\n";
 } catch (Exception $e) {
     echo "❌ Errore: " . $e->getMessage();

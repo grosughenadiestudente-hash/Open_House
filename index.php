@@ -99,7 +99,7 @@ $translations = [
         'corsi_certificazioni' => 'Corsi e Certificazioni',
         'storico_fsl' => 'Storico personale e materiali FSL',
         'cta_join' => 'Unisciti alla piattaforma',
-        'footer' => '© 2025 Open House. Tutti i diritti riservati.',
+        'footer' => 'ï¿½ 2025 Open House. Tutti i diritti riservati.',
         'utenti_finali' => 'Utenti Finali',
         'partner' => 'Partner'
     ],
@@ -143,7 +143,7 @@ $translations = [
         'corsi_certificazioni' => 'Courses and Certifications',
         'storico_fsl' => 'Personal history and FSL materials',
         'cta_join' => 'Join the platform',
-        'footer' => '© 2025 Open House. All rights reserved.',
+        'footer' => 'ï¿½ 2025 Open House. All rights reserved.',
         'utenti_finali' => 'End Users',
         'partner' => 'Partners'
     ]
@@ -260,9 +260,9 @@ $t = $translations[$lang];
                         <div class="card-body">
                             <h5 class="card-title"><i class="bi bi-diagram-3"></i> <?= $t['attori'] ?></h5>
                             <div class="d-grid gap-2">
-                                <a href="istituti_elenco.php?lang=<?= $lang ?>" class="btn btn-outline-primary text-start">1. Istituti (scuole, universita, accademie, ITS)</a>
-                                <a href="istituti_elenco.php?tipologia_ente=arena_vr&lang=<?= $lang ?>" class="btn btn-outline-primary text-start">2. Partner VR (Arena fisse e mobili)</a>
-                                <a href="istituti_elenco.php?lang=<?= $lang ?>" class="btn btn-outline-primary text-start">3. Partner FSL (aziende e istituzioni)</a>
+                                    <a href="istituti_elenco.php?solo=istituti&lang=<?= $lang ?>" class="btn btn-outline-primary text-start">1. Istituti (scuole, universita, accademie, ITS)</a>
+                                    <a href="partner_istituti.php?view=partner_vr&lang=<?= $lang ?>" class="btn btn-outline-primary text-start">2. Partner VR (Arena fisse e mobili)</a>
+                                    <a href="partner_istituti.php?view=partner_fsl&lang=<?= $lang ?>" class="btn btn-outline-primary text-start">3. Partner FSL (aziende e istituzioni)</a>
                             </div>
                         </div>
                     </div>
